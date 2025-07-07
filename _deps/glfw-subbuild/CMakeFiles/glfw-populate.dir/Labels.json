@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glfw-subbuild/CMakeFiles/glfw-populate"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glfw-subbuild/CMakeFiles/88eefa68c8aa015186c311788be957ea/glfw-populate.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glfw-subbuild/CMakeFiles/b8092f40068e3a7fbd2b01ecde260922/glfw-populate-complete.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glfw-subbuild/CMakeFiles/fa7ab727811168da214573d973ca24d7/glfw-populate-build.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glfw-subbuild/CMakeFiles/fa7ab727811168da214573d973ca24d7/glfw-populate-configure.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glfw-subbuild/CMakeFiles/fa7ab727811168da214573d973ca24d7/glfw-populate-download.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glfw-subbuild/CMakeFiles/fa7ab727811168da214573d973ca24d7/glfw-populate-install.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glfw-subbuild/CMakeFiles/fa7ab727811168da214573d973ca24d7/glfw-populate-mkdir.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glfw-subbuild/CMakeFiles/fa7ab727811168da214573d973ca24d7/glfw-populate-patch.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glfw-subbuild/CMakeFiles/fa7ab727811168da214573d973ca24d7/glfw-populate-test.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glfw-subbuild/CMakeFiles/fa7ab727811168da214573d973ca24d7/glfw-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"glfw-populate"
+		],
+		"name" : "glfw-populate"
+	}
+}

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-subbuild\CMakeFiles\803556b7b35d04b10bf29a5b7d665308\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{BFD38C2C-BBD3-31E0-938D-B341ABF6658C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

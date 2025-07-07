@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-subbuild\CMakeFiles\fa7ab727811168da214573d973ca24d7\glfw-populate-mkdir.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-subbuild\CMakeFiles\fa7ab727811168da214573d973ca24d7\glfw-populate-download.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-subbuild\CMakeFiles\fa7ab727811168da214573d973ca24d7\glfw-populate-update.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-subbuild\CMakeFiles\fa7ab727811168da214573d973ca24d7\glfw-populate-patch.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-subbuild\CMakeFiles\fa7ab727811168da214573d973ca24d7\glfw-populate-configure.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-subbuild\CMakeFiles\fa7ab727811168da214573d973ca24d7\glfw-populate-build.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-subbuild\CMakeFiles\fa7ab727811168da214573d973ca24d7\glfw-populate-install.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-subbuild\CMakeFiles\fa7ab727811168da214573d973ca24d7\glfw-populate-test.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-subbuild\CMakeFiles\b8092f40068e3a7fbd2b01ecde260922\glfw-populate-complete.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-subbuild\CMakeFiles\88eefa68c8aa015186c311788be957ea\glfw-populate.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-subbuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-subbuild\CMakeFiles\glfw-populate" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{E4260AEA-9D6D-33C1-BE0F-0C76CF83BFC2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

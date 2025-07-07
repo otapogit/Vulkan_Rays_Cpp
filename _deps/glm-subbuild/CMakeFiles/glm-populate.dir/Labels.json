@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/glm-populate"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/803556b7b35d04b10bf29a5b7d665308/glm-populate.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/b78c38741aebe38f6d7bf054dd0609fa/glm-populate-complete.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/7edbd6c732a7a6f336263ecab70cd770/glm-populate-build.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/7edbd6c732a7a6f336263ecab70cd770/glm-populate-configure.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/7edbd6c732a7a6f336263ecab70cd770/glm-populate-download.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/7edbd6c732a7a6f336263ecab70cd770/glm-populate-install.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/7edbd6c732a7a6f336263ecab70cd770/glm-populate-mkdir.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/7edbd6c732a7a6f336263ecab70cd770/glm-populate-patch.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/7edbd6c732a7a6f336263ecab70cd770/glm-populate-test.rule"
+		},
+		{
+			"file" : "C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/7edbd6c732a7a6f336263ecab70cd770/glm-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"glm-populate"
+		],
+		"name" : "glm-populate"
+	}
+}

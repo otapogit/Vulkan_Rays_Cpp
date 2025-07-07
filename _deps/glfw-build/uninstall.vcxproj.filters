@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\CMakeFiles\b138072f719fc87afae834f17f78f6be\uninstall.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-src\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Cositas\Universi\Master\ProyectoTFM\_deps\glfw-build\CMakeFiles\uninstall" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{C18F156A-785A-38FA-BFA9-520CBC9A658D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
