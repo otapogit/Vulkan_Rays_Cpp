@@ -249,7 +249,7 @@ instances in the scene)
             dirtyupdate = false;
         }
 
-        m_raytracer.render(windowwidth, windowheight, false, "Test1.png");
+        m_raytracer.render(windowwidth, windowheight, saving, "Test1.png");
         return true;
     }
 
@@ -273,6 +273,10 @@ instances in the scene)
         //No implementado
         return 0;
     }
+
+     void save(bool s) {
+         saving = s;
+     }
 
     private:
 
@@ -313,6 +317,8 @@ instances in the scene)
 
         glm::mat4 VP;
         bool pipelineCreated = false;
+
+        bool saving = false;
 
         ////Textures
         std::vector<core::VulkanTexture*> texturesC;

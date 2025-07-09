@@ -91,9 +91,14 @@ namespace core {
 				}
 				//implementar destroybuffer o simplemente
 				vkDestroyBuffer(m_device[0], blas.buffer.m_buffer, NULL);
+				vkFreeMemory(*m_device, blas.buffer.m_mem, nullptr);
 			}
 			m_blas.clear();
-
+			for (uint32_t i = 0; i < allBlas.size(); i++) {
+				vkDestroyBuffer(*m_device, allBlas[i].m_transBuffer.m_buffer, NULL);
+				vkFreeMemory(*m_device, allBlas[i].m_transBuffer.m_mem, nullptr);
+			}
+			allBlas.clear();
 			CleanupMvpDescriptorSet();
 
 			vkDestroyDescriptorPool(*m_device, m_rtDescPool, nullptr);
@@ -156,6 +161,7 @@ namespace core {
 		VkDevice* m_device;
 		VkCommandPool m_cmdBufPool;
 		// Nuevos miembros para almacenar las BLAS creadas
+		std::vector<core::BlasInput> allBlas;
 		std::vector<AccelerationStructure> m_blas;
 
 		core::AccelerationStructure m_tlas;

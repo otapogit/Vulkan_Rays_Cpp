@@ -154,7 +154,6 @@ namespace core {
     // También necesitarás actualizar tu método createBottomLevelAS:
     void Raytracer::createBottomLevelAS(std::vector<core::SimpleMesh> meshes) {
         // BLAS - Storing each primitive in a geometry
-        std::vector<core::BlasInput> allBlas;
         allBlas.reserve(meshes.size());
 
         printf("\n");
@@ -295,9 +294,7 @@ namespace core {
 
         // 5. Limpiar buffer de scratch
         vkDestroyBuffer(*m_device, blasScratchBuffer.m_buffer, NULL);
-        for (uint32_t i = 0; i < nbBlas; i++) {
-            vkDestroyBuffer(*m_device, input[i].m_transBuffer.m_buffer, NULL);
-        }
+
     }
 
     static VkTransformMatrixKHR toTransformMatrixKHR(glm::mat4 matrix)

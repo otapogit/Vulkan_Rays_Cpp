@@ -44,6 +44,8 @@ VulkanRenderApp::~VulkanRenderApp() {
 void VulkanRenderApp::initRt() {
 	CreateCamera(glm::vec3(1.f, 5.f, 1.f));
 
+	VulkanRenderer Renderer;
+
 	Renderer.init();
 
 
@@ -168,28 +170,28 @@ void VulkanRenderApp::initRt() {
 	uint32_t meshid = Renderer.defineMesh(vertData, normData, uvData, indices);
 	printf("Mesh Defined\n");
 
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.00f, 0.f, 0.f)), glm::vec3(1.0f), meshid);
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.00f, 0.f, 0.f)), glm::vec3(1.0f), topMeshId);
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.00f, 0.f, 0.f)), glm::vec3(1.0f), bottomMeshId);
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.00f, 0.f, 0.f)), glm::vec3(1.0f), diagonalMeshId);
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.00f, 0.f, 0.f)), glm::vec3(1.0f), frontMeshId);
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.00f, 0.f, 0.f)), glm::vec3(1.0f), rightMeshId);
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.00f, 0.f, 0.f)), glm::vec3(1.0f), leftMeshId);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), meshid);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), topMeshId);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), bottomMeshId);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), diagonalMeshId);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), frontMeshId);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), rightMeshId);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), leftMeshId);
 
 	Renderer.setCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
 	//Renderer.setCamera(glm::mat4(1.0f), glm::mat4(1.0f));
 	Renderer.setOutputResolution(800, 800);
 
+	Renderer.save(true);
 
-
-	
+	Renderer.render();
 	printf("Rendered everything\n");
 
 
 }
 
 void VulkanRenderApp::loop() {
-	Renderer.render();
+
 }
 
  void VulkanRenderApp::CreateCamera(glm::vec3 pos) {
