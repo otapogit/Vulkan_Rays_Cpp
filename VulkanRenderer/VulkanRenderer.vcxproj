@@ -296,8 +296,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="include\core\physical_device.h" />
     <ClInclude Include="include\core\utils.h" />
     <ClInclude Include="include\core_fpcamera.h" />
-    <ClInclude Include="VulkanRenderer.h" />
-    <ClInclude Include="RenderingApp.h" />
+    <ClInclude Include="include\Renderer\RenderingApp.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:\Cositas\Universi\Master\ProyectoTFM\ZERO_CHECK.vcxproj">

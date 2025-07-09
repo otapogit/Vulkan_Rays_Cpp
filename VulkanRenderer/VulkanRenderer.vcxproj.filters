@@ -78,10 +78,7 @@
     <ClInclude Include="include\core\utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RenderingApp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanRenderer.h">
+    <ClInclude Include="include\Renderer\RenderingApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

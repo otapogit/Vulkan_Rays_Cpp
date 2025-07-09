@@ -249,7 +249,7 @@ instances in the scene)
             dirtyupdate = false;
         }
 
-        m_raytracer.render(windowwidth, windowheight, true, "Test1.png");
+        m_raytracer.render(windowwidth, windowheight, false, "Test1.png");
         return true;
     }
 

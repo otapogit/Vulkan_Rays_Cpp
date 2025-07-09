@@ -49,6 +49,8 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
 
+		//App.loop();
+
 		// swap buffers (replace the old image with a new one)
 		// this won't have any visible effect until we add actual drawing
 		glfwSwapBuffers(window);

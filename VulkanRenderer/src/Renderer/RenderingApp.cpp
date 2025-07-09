@@ -44,8 +44,6 @@ VulkanRenderApp::~VulkanRenderApp() {
 void VulkanRenderApp::initRt() {
 	CreateCamera(glm::vec3(1.f, 5.f, 1.f));
 
-	VulkanRenderer Renderer;
-
 	Renderer.init();
 
 
@@ -184,10 +182,14 @@ void VulkanRenderApp::initRt() {
 
 
 
-	Renderer.render();
+	
 	printf("Rendered everything\n");
 
 
+}
+
+void VulkanRenderApp::loop() {
+	Renderer.render();
 }
 
  void VulkanRenderApp::CreateCamera(glm::vec3 pos) {
