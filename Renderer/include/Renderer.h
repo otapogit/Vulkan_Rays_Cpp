@@ -12,12 +12,12 @@ public:
     using TextureId = uint32_t;
     using LightId = uint32_t;
 
-    Renderer();
+    Renderer() {}
     /**
      * @brief Initializes the underlying graphics library (GL, Vulkan...)
      * @return true, if succeeded
      */
-    virtual bool init();
+    virtual bool init() = 0;
     /**
      * @brief Defines a mesh (it won't be rendered until it is added to
 the scene with Renderer::addMesh
@@ -31,7 +31,7 @@ the scene with Renderer::addMesh
         const std::vector<glm::vec3>& vtcs,
         const std::vector<glm::vec3>& nrmls,
         const std::vector<glm::vec2>& uv,
-        const std::vector<uint32_t> inds);
+        const std::vector<uint32_t> inds) = 0;
 
     /**
      * @brief Add a previously defined mesh to the scene
@@ -40,16 +40,16 @@ the scene with Renderer::addMesh
      * @return false if the mesh id does not exists
      */
     virtual bool addMesh(const glm::mat4& modelMatrix, const glm::vec3
-        & color, MeshId id);
+        & color, MeshId id) = 0;
 
 
     virtual TextureId addTexture(uint8_t* texels, uint32_t width,
-        uint32_t height, uint32_t bpp);
+        uint32_t height, uint32_t bpp) = 0;
 
-    virtual deleteTexture(TextureId tid);
+    virtual void deleteTexture(TextureId tid) = 0;
 
     virtual bool addLight(const glm::mat4& modelMatrix, MeshId id,
-        const glm::vec3& color, LightId lid, TextureId tid = 0);
+        const glm::vec3& color, LightId lid, TextureId tid = 0) = 0;
 
     /**
      * @brief Removes the indicated mesh from memory (and all its
@@ -57,12 +57,12 @@ instances in the scene)
       * @param id
       * @return false if the mesh id does not exists
       */
-    virtual bool removeMesh(MeshId id);
+    virtual bool removeMesh(MeshId id) = 0;
 
     /**
      * @brief removes all the meshes from the scene
      */
-    virtual void clearScene();
+    virtual void clearScene() = 0;
 
     /**
      * @brief Defines the camera
@@ -70,21 +70,21 @@ instances in the scene)
      * @param projMatrix
      */
     virtual void setCamera(const glm::mat4& viewMatrix, const
-        glm::mat4& projMatrix);
+        glm::mat4& projMatrix) = 0;
 
     /**
      * @brief Defines the size of the result image
      * @param width
      * @param height
      */
-    virtual void setOutputResolution(uint32_t width, uint32_t height);
+    virtual void setOutputResolution(uint32_t width, uint32_t height) = 0;
 
     /**
      * @brief Renders the scene. The result can be obtained with
 Renderer::copyResultBytes or Renderer::getResultTextureId
       * @return
       */
-    virtual bool render();
+    virtual bool render() = 0;
 
     /**
      * @brief  Copies the final image into buffer
@@ -92,12 +92,12 @@ Renderer::copyResultBytes or Renderer::getResultTextureId
      * @param bufferSize size of buffer
      * @return the number of bytes written to buffer
      */
-    virtual size_t copyResultBytes(uint8_t* buffer, size_t bufferSize);
+    virtual size_t copyResultBytes(uint8_t* buffer, size_t bufferSize) = 0;
 
     /**
      * @brief Returns the texture object id with the result image
      * @return the GL? object Id (0 if there is not a texture, or it is
 not compatible with GL)
       */
-    virtual uint32_t getResultTextureId();
+    virtual uint32_t getResultTextureId() = 0;
 };

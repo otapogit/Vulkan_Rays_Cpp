@@ -2,7 +2,10 @@
 #include <stdio.h> // fprintf, stderr
 
 #include <GLFW/glfw3.h>
+#include <Renderer/RenderingApp.h>
 
+#define GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_VULKAN
 // this function will be called internally by GLFW whenever an error occur.
 void error_callback(int error, const char* description) {
 	fprintf(stderr, "Error: %s (%d)\n", description, error);
@@ -33,6 +36,9 @@ int main() {
 
 	// Enable v-sync for now, if possible
 	glfwSwapInterval(1);
+
+	VulkanRenderApp app(1920,1080);
+	app.initRt();
 
 	// main loop
 	while (!glfwWindowShouldClose(window)) {

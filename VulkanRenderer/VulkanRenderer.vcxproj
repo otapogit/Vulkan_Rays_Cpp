@@ -78,7 +78,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(Vulkan_SDK)/Include;%(AdditionalIncludeDirectories);C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Users\carlos\source\repos\glm;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\Cositas\Universi\TFM\glslang\include;C:\Cositas\Universi\Master\ProyectoTFMVulkanRenderer\src</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/VulkanSDK/1.4.309.0/Include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -96,10 +96,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\GLSLANG_INCLUDE_DIR-NOTFOUND;C:\Users\carlos\source\repos\glm;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\GLSLANG_INCLUDE_DIR-NOTFOUND;C:\Users\carlos\source\repos\glm;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -108,11 +108,13 @@
     </Midl>
     <Lib>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <AdditionalDependencies>SPIRVd.lib;SPIRV-Toolsd.lib;SPIRV-Tools-diffd.lib;SPIRV-Tools-optd.lib;glslangd.lib;glslang-default-resource-limitsd.lib;OSDependentd.lib;GenericCodeGend.lib;MachineIndependentd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Cositas\Universi\TFM\glslang\External\spirv-tools\source\diff\Debug;C:\Cositas\Universi\TFM\glslang\External\spirv-tools\source\opt\Debug;C:\Cositas\Universi\TFM\glslang\External\spirv-tools\source\Debug;C:\Cositas\Universi\TFM\glslang\glslang\OSDependent\Windows\Debug;C:\Cositas\Universi\TFM\glslang\glslang\Debug;C:\Cositas\Universi\TFM\glslang\include;C:\Cositas\Universi\TFM\glslang\SPIRV\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\GLSLANG_INCLUDE_DIR-NOTFOUND;C:\Users\carlos\source\repos\glm;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/VulkanSDK/1.4.309.0/Include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -130,10 +132,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\GLSLANG_INCLUDE_DIR-NOTFOUND;C:\Users\carlos\source\repos\glm;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\GLSLANG_INCLUDE_DIR-NOTFOUND;C:\Users\carlos\source\repos\glm;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -146,7 +148,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\GLSLANG_INCLUDE_DIR-NOTFOUND;C:\Users\carlos\source\repos\glm;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/VulkanSDK/1.4.309.0/Include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -164,10 +166,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\GLSLANG_INCLUDE_DIR-NOTFOUND;C:\Users\carlos\source\repos\glm;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\GLSLANG_INCLUDE_DIR-NOTFOUND;C:\Users\carlos\source\repos\glm;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -180,7 +182,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\GLSLANG_INCLUDE_DIR-NOTFOUND;C:\Users\carlos\source\repos\glm;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/VulkanSDK/1.4.309.0/Include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -197,10 +199,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\GLSLANG_INCLUDE_DIR-NOTFOUND;C:\Users\carlos\source\repos\glm;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include;C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\GLSLANG_INCLUDE_DIR-NOTFOUND;C:\Users\carlos\source\repos\glm;C:\Cositas\Universi\Master\ProyectoTFM\Renderer\include;C:\Cositas\Universi\Master\ProyectoTFM\_deps\glm-src\glm\..;C:\VulkanSDK\1.4.309.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -224,7 +226,7 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindVulkan.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindVulkan.cmake;C:\Users\carlos\source\repos\glfw\glfw3Config.cmake;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Cositas/Universi/Master/ProyectoTFM/VulkanRenderer/CMakeLists.txt</Message>
@@ -237,7 +239,7 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindVulkan.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindVulkan.cmake;C:\Users\carlos\source\repos\glfw\glfw3Config.cmake;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
       <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Cositas/Universi/Master/ProyectoTFM/VulkanRenderer/CMakeLists.txt</Message>
@@ -250,7 +252,7 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindVulkan.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindVulkan.cmake;C:\Users\carlos\source\repos\glfw\glfw3Config.cmake;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
       <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Cositas/Universi/Master/ProyectoTFM/VulkanRenderer/CMakeLists.txt</Message>
@@ -263,14 +265,39 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindVulkan.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.28\Modules\FindVulkan.cmake;C:\Users\carlos\source\repos\glfw\glfw3Config.cmake;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\core.cpp" />
+    <ClCompile Include="src\core\core_queue.cpp" />
+    <ClCompile Include="src\core\core_rt.cpp" />
+    <ClCompile Include="src\core\core_shader.cpp" />
+    <ClCompile Include="src\core\core_wrapper.cpp" />
+    <ClCompile Include="src\core\physical_device.cpp" />
+    <ClCompile Include="src\core\stb_image.cpp" />
+    <ClCompile Include="src\core\utils.cpp" />
+    <ClCompile Include="src\Renderer\core_fpcamera.cpp" />
+    <ClCompile Include="src\Renderer\RenderingApp.cpp" />
+    <ClCompile Include="src\Renderer\VulkanRenderer.cpp" />
+    <ClCompile Include="src\Renderer\VulkanApp.cpp" />
     <ClInclude Include="C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\include\GlRenderer.h" />
     <ClCompile Include="C:\Cositas\Universi\Master\ProyectoTFM\VulkanRenderer\src\vulkanRenderer.cpp" />
+    <ClInclude Include="include\core\core.h" />
+    <ClInclude Include="include\core\core_queue.h" />
+    <ClInclude Include="include\core\core_rt.h" />
+    <ClInclude Include="include\core\core_shader.h" />
+    <ClInclude Include="include\core\core_simple_mesh.h" />
+    <ClInclude Include="include\core\core_utils.h" />
+    <ClInclude Include="include\core\core_vertex.h" />
+    <ClInclude Include="include\core\core_wrapper.h" />
+    <ClInclude Include="include\core\physical_device.h" />
+    <ClInclude Include="include\core\utils.h" />
+    <ClInclude Include="include\core_fpcamera.h" />
+    <ClInclude Include="VulkanRenderer.h" />
+    <ClInclude Include="RenderingApp.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:\Cositas\Universi\Master\ProyectoTFM\ZERO_CHECK.vcxproj">

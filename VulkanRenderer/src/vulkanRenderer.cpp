@@ -1,6 +1,7 @@
 
 #include <vulkan/vulkan.h>
 #include <stdexcept>
+#include "glm/ext.hpp"
 
 bool VKfoo() {
 

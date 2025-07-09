@@ -156,6 +156,9 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO:STRING=/debug /INCREMENTAL
 //Path to a program.
 CMAKE_MT:FILEPATH=CMAKE_MT-NOTFOUND
 
+//No help, variable specified on the command line.
+CMAKE_PREFIX_PATH:UNINITIALIZED=C:\Users\carlos\source\repos\glm
+
 //Value Computed by CMake
 CMAKE_PROJECT_DESCRIPTION:STATIC=
 
@@ -311,6 +314,24 @@ GLFW_USE_HYBRID_HPG:BOOL=OFF
 //Assume the Vulkan loader is linked with the application
 GLFW_VULKAN_STATIC:BOOL=OFF
 
+//GLM include directory
+GLM_INCLUDE_DIR:PATH=C:/Users/carlos/source/repos/glm
+
+//Path to a file.
+GLSLANG_INCLUDE_DIR:PATH=GLSLANG_INCLUDE_DIR-NOTFOUND
+
+//Path to a library.
+GLSLANG_LIBRARY:FILEPATH=GLSLANG_LIBRARY-NOTFOUND
+
+//Path to a library.
+GLSLANG_OGLCOMPILER_LIBRARY:FILEPATH=GLSLANG_OGLCOMPILER_LIBRARY-NOTFOUND
+
+//Path to a library.
+GLSLANG_OSDEPENDENT_LIBRARY:FILEPATH=GLSLANG_OSDEPENDENT_LIBRARY-NOTFOUND
+
+//Path to a library.
+GLSLANG_SPIRV_LIBRARY:FILEPATH=GLSLANG_SPIRV_LIBRARY-NOTFOUND
+
 //Value Computed by CMake
 MyProject_BINARY_DIR:STATIC=C:/Cositas/Universi/Master/ProyectoTFM
 
@@ -341,14 +362,23 @@ Vulkan_INCLUDE_DIR:PATH=C:/VulkanSDK/1.4.309.0/Include
 //Path to a library.
 Vulkan_LIBRARY:FILEPATH=C:/VulkanSDK/1.4.309.0/Lib/vulkan-1.lib
 
+//The directory containing a CMake configuration file for glfw3.
+glfw3_DIR:PATH=C:/Users/carlos/source/repos/glfw
+
 //Value Computed by CMake
 glm_BINARY_DIR:STATIC=C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-build
+
+//No help, variable specified on the command line.
+glm_DIR:UNINITIALIZED=C:\Users\carlos\source\repos\glm\cmake\glm
 
 //Value Computed by CMake
 glm_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
 glm_SOURCE_DIR:STATIC=C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-src
+
+//The directory containing a CMake configuration file for glslang.
+glslang_DIR:PATH=glslang_DIR-NOTFOUND
 
 
 ########################
@@ -543,4 +573,6 @@ Vulkan_INCLUDE_DIR-ADVANCED:INTERNAL=1
 Vulkan_LIBRARY-ADVANCED:INTERNAL=1
 //CMAKE_INSTALL_PREFIX during last run
 _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=C:/Program Files (x86)/MyProject
+//ADVANCED property for variable: glm_DIR
+glm_DIR-ADVANCED:INTERNAL=1
 
