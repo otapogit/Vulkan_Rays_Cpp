@@ -98,8 +98,11 @@ the scene with Renderer::addMesh
         const std::vector<uint32_t> inds) override {
 
         core::SimpleMesh mesh;
-        mesh.m_vertexBufferSize = sizeof(vtcs[0]) * vtcs.size();
-        mesh.m_vb = m_vkcore.CreateVertexBuffer(vtcs.data(), mesh.m_vertexBufferSize, true);
+        //mesh.m_vertexBufferSize = sizeof(vtcs[0]) * vtcs.size();
+        //mesh.m_vb = m_vkcore.CreateVertexBuffer(vtcs.data(), mesh.m_vertexBufferSize, true);
+
+        mesh.verts = vtcs;
+        mesh.norms = nrmls;
 
         mesh.m_indexBufferSize = sizeof(inds[0]) * inds.size();
         mesh.m_indexbuffer = m_vkcore.CreateIndexBuffer(inds.data(), mesh.m_indexBufferSize, true);
@@ -107,7 +110,7 @@ the scene with Renderer::addMesh
         mesh.m_indexType = VK_INDEX_TYPE_UINT32;
 
         //Faltan crear buffer de normales e uvs
-        mesh.m_normalbuffer = m_vkcore.CreateNormalBuffer(nrmls, true);
+        //mesh.m_normalbuffer = m_vkcore.CreateNormalBuffer(nrmls, true);
 
         mesh.m_uvbuffer = m_vkcore.CreateUVBuffer(uv, true);
 
@@ -149,6 +152,35 @@ the scene with Renderer::addMesh
 
         meshesC[tid].color = color;
 
+        std::vector<glm::vec3> modelverts = {};
+        std::vector<glm::vec3> modelnorms = {};
+
+        for (const glm::vec3& vert : meshesC[tid].verts) {
+            glm::vec4 homogeneousVert = glm::vec4(vert, 1.0f);
+
+            // Multiplicar por la matriz de transformación
+            glm::vec4 transformedVert = modelMatrix * homogeneousVert;
+
+            // Convertir de vuelta a vec3 (xyz)
+            modelverts.push_back(glm::vec3(transformedVert));
+        }
+
+        for (const glm::vec3& norm : meshesC[tid].norms) {
+            // Para normales usamos w=0.0f porque no queremos que se vean afectadas por la traslación
+            glm::vec4 homogeneousNorm = glm::vec4(norm, 0.0f);
+
+            // Multiplicar por la matriz de transformación
+            glm::vec4 transformedNorm = modelMatrix * homogeneousNorm;
+
+            // Convertir de vuelta a vec3 y normalizar
+            modelnorms.push_back(glm::normalize(glm::vec3(transformedNorm)));
+        }
+
+        //meshesC[tid].
+        meshesC[tid].m_vertexBufferSize = sizeof(modelverts[0]) * modelverts.size();
+        meshesC[tid].m_vb = m_vkcore.CreateVertexBuffer(modelverts.data(), meshesC[tid].m_vertexBufferSize, true);
+        meshesC[tid].m_normalbuffer = m_vkcore.CreateNormalBuffer(modelnorms, true);
+     
         //m_meshesDraw contiene las meshes que se dibujarán
         m_meshesDraw.push_back(meshesC[tid]);
 
@@ -271,6 +303,25 @@ instances in the scene)
      uint32_t getResultTextureId() override{
         //Mirar el interop
         //No implementado
+         // Exportar handle
+        /* VkMemoryGetFdInfoKHR fdInfo = {};
+         fdInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR;
+         fdInfo.memory = deviceMemory;
+         fdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+
+         int memoryFd;
+         vkGetMemoryFdKHR(device, &fdInfo, &memoryFd);
+
+         // En OpenGL - importar memoria
+         GLuint memoryObject;
+         glCreateMemoryObjectsEXT(1, &memoryObject);
+         glImportMemoryFdEXT(memoryObject, memorySize, GL_HANDLE_TYPE_OPAQUE_FD_EXT, memoryFd);
+
+         // Crear textura OpenGL
+         GLuint texture;
+         glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+         glTextureStorageMem2DEXT(texture, levels, internalFormat, width, height, memoryObject, offset)
+         */
         return 0;
     }
 

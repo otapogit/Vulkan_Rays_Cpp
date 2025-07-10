@@ -63,7 +63,7 @@ namespace core {
         // Indicate identity transform by setting transformData to null device pointer.
         triangles.transformData = {};
         triangles.maxVertex = (uint32_t)(model.m_vertexBufferSize - 1);
-        if (model.m_transMat != glm::mat4(1.0f)) {
+        /*if (model.m_transMat != glm::mat4(1.0f)) {
             // Handle transformation matrix
             VkDeviceAddress transformAddress = 0;
             BufferMemory transformBuffer;
@@ -75,7 +75,7 @@ namespace core {
                 model.m_transMat[0][2], model.m_transMat[1][2], model.m_transMat[2][2], // Third column
                 model.m_transMat[0][3], model.m_transMat[1][3], model.m_transMat[2][3]  // Fourth column (translation)
             };
-            /*
+            
             // Create buffer for transformation matrix
             VkBufferUsageFlags usage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
                 VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
@@ -88,7 +88,7 @@ namespace core {
             VkResult res = vkMapMemory(*m_device, transformBuffer.m_mem, 0, sizeof(transformMatrix), 0, &pMem);
             CHECK_VK_RESULT(res, "vkMapMemory transform\n");
             memcpy(pMem, transformMatrix, sizeof(transformMatrix));
-            vkUnmapMemory(*m_device, transformBuffer.m_mem);*/
+            vkUnmapMemory(*m_device, transformBuffer.m_mem);
 
             // Step 1: Create staging buffer
             VkBufferUsageFlags stagingUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -126,7 +126,7 @@ namespace core {
             triangles.transformData.deviceAddress = transformAddress;
             input.m_transBuffer = transformBuffer;
             printf("%zd", transformAddress);
-        }
+        }*/
 
         // Identify the above data as containing opaque triangles.
         VkAccelerationStructureGeometryKHR asGeom{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };

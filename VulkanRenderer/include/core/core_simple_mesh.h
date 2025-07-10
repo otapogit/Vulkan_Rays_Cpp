@@ -2,9 +2,15 @@
 
 #include "core/core.h"
 #include "glm/ext.hpp"
+#include <vector>
 
 namespace core{
 	struct SimpleMesh {
+
+		std::vector<glm::vec3> verts;
+		std::vector<glm::vec3> norms;
+
+
 		BufferMemory m_vb;
 		BufferMemory m_indexbuffer;
 		BufferMemory m_normalbuffer;

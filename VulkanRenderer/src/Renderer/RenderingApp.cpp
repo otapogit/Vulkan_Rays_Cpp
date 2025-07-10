@@ -170,13 +170,13 @@ void VulkanRenderApp::initRt() {
 	uint32_t meshid = Renderer.defineMesh(vertData, normData, uvData, indices);
 	printf("Mesh Defined\n");
 
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), meshid);
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), topMeshId);
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), bottomMeshId);
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), diagonalMeshId);
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), frontMeshId);
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), rightMeshId);
-	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.001f, 0.f, 0.f)), glm::vec3(1.0f), leftMeshId);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), meshid);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), topMeshId);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), bottomMeshId);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), diagonalMeshId);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), frontMeshId);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), rightMeshId);
+	Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), leftMeshId);
 
 	Renderer.setCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
 	//Renderer.setCamera(glm::mat4(1.0f), glm::mat4(1.0f));
