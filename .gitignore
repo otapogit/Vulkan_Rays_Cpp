@@ -411,4 +411,8 @@ FodyWeavers.xsd
 x64/
 _deps/
 CMakeFiles/
+.git/
+.vs/
+CMakeCache.txt
+*.cmake
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio
