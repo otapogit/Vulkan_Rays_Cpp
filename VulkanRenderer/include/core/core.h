@@ -1,5 +1,8 @@
 #pragma once
 #include <vulkan/vulkan_core.h>
+#define VK_USE_PLATFORM_WIN32_KHR
+#include <windows.h>
+#include <vulkan/vulkan_win32.h>
 
 #include "core/core_utils.h"
 #include "core/physical_device.h"

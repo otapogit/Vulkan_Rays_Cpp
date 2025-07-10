@@ -1,5 +1,6 @@
 #include "Renderer/RenderingApp.h"
 #include "VulkanRenderer.cpp"
+#include <GL/glew.h>
 #include <vector>
 #include "core_fpcamera.h"
 
@@ -187,6 +188,9 @@ void VulkanRenderApp::initRt() {
 	Renderer.render();
 	printf("Rendered everything\n");
 
+
+	uint32_t tex = Renderer.getResultTextureId();
+	printf("texture created at: %zd", tex);
 
 }
 

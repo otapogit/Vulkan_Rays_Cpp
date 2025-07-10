@@ -1,5 +1,8 @@
 #pragma once
 #include "Renderer.h"
+#ifdef WIN32
+#include <windows.h>  // Necesario en Windows antes de OpenGL
+#endif
 #include "core/core.h"
 //#include <GLFW/glfw3.h> DEPRECATED
 #include <core/core_shader.h>
@@ -12,20 +15,14 @@
 #include <iostream>
 
 #include <glm/glm.hpp>
-#ifdef _WIN32
-#include <windows.h>  // Necesario en Windows antes de OpenGL
-#endif
 
+
+#include <GL/glew.h>
 #include <GL/gl.h>      // Para funciones básicas de OpenGL
 #include <GL/glu.h>     // Para funciones de utilidad (opcional)
 
-//incluir las librerias de abajo
+#include <stdexcept>
 
-//#ifdef WIN32
-//#include <GL/wglext.h>  // Para extensiones OpenGL-Vulkan interop en Windows
-//#else
-//#include <GL/glxext.h>  // Para extensiones OpenGL-Vulkan interop en Linux
-//#endif
 
 // Extensiones OpenGL necesarias para memory objects
 #ifndef GL_EXT_memory_object
@@ -108,7 +105,13 @@ class VulkanRenderer : public Renderer {
 
         m_raytracer.createRtPipeline(rgen, rmiss, rchit);
         m_raytracer.createRtShaderBindingTable();
+        /*
+        vkGetMemoryWin32HandleKHR = (PFN_vkGetMemoryWin32HandleKHR)
+            vkGetDeviceProcAddr(m_device, "vkGetMemoryWin32HandleKHR");
 
+        if (!vkGetMemoryWin32HandleKHR) {
+            return false;
+        }*/
 
         return true;
     }
@@ -344,6 +347,7 @@ instances in the scene)
              VkMemoryRequirements memReqs;
              vkGetImageMemoryRequirements(m_device, m_outTexture->m_image, &memReqs);
              // Windows - exportar handle
+             
              VkMemoryGetWin32HandleInfoKHR handleInfo = {};
              handleInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR;
              handleInfo.memory = m_outTexture->m_mem;
@@ -354,12 +358,12 @@ instances in the scene)
              if (result != VK_SUCCESS) {
                  return 0;
              }
-
+             
              // En OpenGL - importar memoria
              GLuint memoryObject;
              glCreateMemoryObjectsEXT(1, &memoryObject);
              glImportMemoryWin32HandleEXT(memoryObject, memReqs.size, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, memoryHandle);
-
+             
             #else
              // Linux - exportar file descriptor
              VkMemoryGetFdInfoKHR fdInfo = {};
@@ -380,16 +384,16 @@ instances in the scene)
             #endif
 
              // Crear textura OpenGL
-             GLuint texture;
+             GLuint texture = 0;
              glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-             glTextureStorageMem2DEXT(texture, levels, internalFormat, width, height, memoryObject, offset);
-             return texture;
+             glTextureStorageMem2DEXT(texture, 1, GL_RGBA8, windowwidth, windowheight, memoryObject, 0);
+             return (uint32_t)texture;
          }
          catch (...) {
-
+             return 0;
          }
 
-        return 0;
+
     }
 
      void save(bool s) {
@@ -444,4 +448,7 @@ instances in the scene)
 
         ///RAYTRACING
         core::Raytracer m_raytracer;
+
+        //PFN_vkGetMemoryWin32HandleKHR vkGetMemoryWin32HandleKHR = nullptr;
+        //PFN_vkGetMemoryWin32HandleKHR vkGetMemoryWin32HandleKHR;
 };
