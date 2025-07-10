@@ -1,3 +1,0 @@
-C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/glm-populate.dir
-C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/ALL_BUILD.dir
-C:/Cositas/Universi/Master/ProyectoTFM/_deps/glm-subbuild/CMakeFiles/ZERO_CHECK.dir

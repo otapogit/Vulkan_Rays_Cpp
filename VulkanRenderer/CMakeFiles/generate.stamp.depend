@@ -1,6 +1,0 @@
-# CMake generation dependency list for this directory.
-C:/Cositas/Universi/Master/ProyectoTFM/VulkanRenderer/CMakeLists.txt
-C:/Program Files/CMake/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake
-C:/Program Files/CMake/share/cmake-3.28/Modules/FindPackageMessage.cmake
-C:/Program Files/CMake/share/cmake-3.28/Modules/FindVulkan.cmake
-C:/Users/carlos/source/repos/glfw/glfw3Config.cmake
