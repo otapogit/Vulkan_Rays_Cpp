@@ -12,6 +12,38 @@
 #include <iostream>
 
 #include <glm/glm.hpp>
+#ifdef _WIN32
+#include <windows.h>  // Necesario en Windows antes de OpenGL
+#endif
+
+#include <GL/gl.h>      // Para funciones básicas de OpenGL
+#include <GL/glu.h>     // Para funciones de utilidad (opcional)
+
+//incluir las librerias de abajo
+
+//#ifdef WIN32
+//#include <GL/wglext.h>  // Para extensiones OpenGL-Vulkan interop en Windows
+//#else
+//#include <GL/glxext.h>  // Para extensiones OpenGL-Vulkan interop en Linux
+//#endif
+
+// Extensiones OpenGL necesarias para memory objects
+#ifndef GL_EXT_memory_object
+#define GL_EXT_memory_object 1
+#endif
+
+#ifndef GL_EXT_memory_object_fd
+#define GL_EXT_memory_object_fd 1
+#endif
+
+#ifndef GL_EXT_memory_object_win32
+#define GL_EXT_memory_object_win32 1
+#endif
+
+
+// Si usas extensiones modernas, también:
+//#include <GL/glext.h>   // Para extensiones
+
 
 class VulkanRenderer : public Renderer {
     public:
@@ -302,26 +334,61 @@ instances in the scene)
      */
      uint32_t getResultTextureId() override{
         //Mirar el interop
-        //No implementado
-         // Exportar handle
-        /* VkMemoryGetFdInfoKHR fdInfo = {};
-         fdInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR;
-         fdInfo.memory = deviceMemory;
-         fdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
 
-         int memoryFd;
-         vkGetMemoryFdKHR(device, &fdInfo, &memoryFd);
+         if (!m_outTexture || !m_outTexture->m_mem) {
+             return 0;
+         }
+        // 
+         try {
+            #ifdef WIN32
+             VkMemoryRequirements memReqs;
+             vkGetImageMemoryRequirements(m_device, m_outTexture->m_image, &memReqs);
+             // Windows - exportar handle
+             VkMemoryGetWin32HandleInfoKHR handleInfo = {};
+             handleInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR;
+             handleInfo.memory = m_outTexture->m_mem;
+             handleInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
 
-         // En OpenGL - importar memoria
-         GLuint memoryObject;
-         glCreateMemoryObjectsEXT(1, &memoryObject);
-         glImportMemoryFdEXT(memoryObject, memorySize, GL_HANDLE_TYPE_OPAQUE_FD_EXT, memoryFd);
+             HANDLE memoryHandle;
+             VkResult result = vkGetMemoryWin32HandleKHR(m_device, &handleInfo, &memoryHandle);
+             if (result != VK_SUCCESS) {
+                 return 0;
+             }
 
-         // Crear textura OpenGL
-         GLuint texture;
-         glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-         glTextureStorageMem2DEXT(texture, levels, internalFormat, width, height, memoryObject, offset)
-         */
+             // En OpenGL - importar memoria
+             GLuint memoryObject;
+             glCreateMemoryObjectsEXT(1, &memoryObject);
+             glImportMemoryWin32HandleEXT(memoryObject, memReqs.size, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, memoryHandle);
+
+            #else
+             // Linux - exportar file descriptor
+             VkMemoryGetFdInfoKHR fdInfo = {};
+             fdInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR;
+             fdInfo.memory = m_outTexture->m_mem;
+             fdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+
+             int memoryFd;
+             VkResult result = vkGetMemoryFdKHR(m_device, &fdInfo, &memoryFd);
+             if (result != VK_SUCCESS) {
+                 return 0;
+             }
+
+             // En OpenGL - importar memoria
+             GLuint memoryObject;
+             glCreateMemoryObjectsEXT(1, &memoryObject);
+             glImportMemoryFdEXT(memoryObject, memReqs.size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, memoryFd);
+            #endif
+
+             // Crear textura OpenGL
+             GLuint texture;
+             glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+             glTextureStorageMem2DEXT(texture, levels, internalFormat, width, height, memoryObject, offset);
+             return texture;
+         }
+         catch (...) {
+
+         }
+
         return 0;
     }
 

@@ -967,9 +967,13 @@ namespace core {
 	void VulkanCore::CreateImage(VulkanTexture& Tex, uint32_t ImageWidth, uint32_t ImageHeight, VkFormat TexFormat,
 		VkImageUsageFlags UsageFlags, VkMemoryPropertyFlagBits PropertyFlags)
 	{
+		VkExternalMemoryImageCreateInfo externalInfoImage = {};
+		externalInfoImage.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
+		externalInfoImage.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+
 		VkImageCreateInfo ImageInfo = {};
 		ImageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		ImageInfo.pNext = NULL;
+		ImageInfo.pNext = &externalInfoImage;
 		ImageInfo.flags = 0;
 		ImageInfo.imageType = VK_IMAGE_TYPE_2D;
 		ImageInfo.format = TexFormat;
@@ -1002,10 +1006,14 @@ namespace core {
 		uint32_t MemoryTypeIndex = GetMemoryTypeIndex(MemReqs.memoryTypeBits, PropertyFlags);
 		printf("Memory type index %d\n", MemoryTypeIndex);
 
+		VkExportMemoryAllocateInfo exportAllocInfo = {};
+		exportAllocInfo.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO;
+		exportAllocInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+
 		// Step 4: allocate memory
 		VkMemoryAllocateInfo MemAllocInfo = {};
 		MemAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		MemAllocInfo.pNext = NULL;
+		MemAllocInfo.pNext = &exportAllocInfo;
 		MemAllocInfo.allocationSize = MemReqs.size;
 		MemAllocInfo.memoryTypeIndex = MemoryTypeIndex;
 

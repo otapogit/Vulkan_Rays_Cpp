@@ -210,14 +210,10 @@ namespace core {
 		SubresourceRange.baseArrayLayer = 0;
 		SubresourceRange.layerCount = 1;
 
-		//Permitir exportar memoria a OpenGL
-		VkExternalMemoryImageCreateInfo externalInfo = {};
-		externalInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
-		externalInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
 
 		VkImageViewCreateInfo ViewInfo = {};
 		ViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		ViewInfo.pNext = &externalInfo;
+		ViewInfo.pNext = NULL;
 		ViewInfo.flags = 0;
 		ViewInfo.image = Image;
 		ViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;

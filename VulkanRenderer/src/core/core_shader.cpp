@@ -14,6 +14,7 @@
 // Required for use of glslang_default_resource
 #include <glslang/Public/resource_limits_c.h>
 
+
 namespace core {
 	
 	struct coreShader {
