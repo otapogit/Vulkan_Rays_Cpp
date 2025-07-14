@@ -327,7 +327,7 @@ instances in the scene)
      */
      uint32_t getResultTextureId() override{
         //Mirar el interop
-
+         /*
          if (!m_outTexture || !m_outTexture->m_mem) {
              return 0;
          }
@@ -381,8 +381,8 @@ instances in the scene)
          }
          catch (...) {
              return 0;
-         }
-
+         }*/
+         return 0;
 
     }
 

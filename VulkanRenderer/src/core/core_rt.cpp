@@ -1001,7 +1001,7 @@ namespace core {
 
     void Raytracer::CleanupGeometryDescriptorSet() {
         // Limpiar buffers
-        for (auto& buffer : m_vertexBuffers) {
+        /*for (auto& buffer : m_vertexBuffers) {
             buffer.Destroy(*m_device);
         }
         for (auto& buffer : m_indexBuffers) {
@@ -1012,7 +1012,7 @@ namespace core {
         }
         for (auto& buffer : m_textureIndexBuffers) {
             buffer.Destroy(*m_device);
-        }
+        }*/
 
         m_vertexBuffers.clear();
         m_indexBuffers.clear();
@@ -1028,6 +1028,7 @@ namespace core {
             vkDestroyDescriptorPool(*m_device, m_geometryDescPool, nullptr);
             m_geometryDescPool = VK_NULL_HANDLE;
         }
+        printf("");
     }
 
     void Raytracer::updateGeometryDescriptorSet(const std::vector<core::SimpleMesh>& meshes) {

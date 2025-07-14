@@ -6,7 +6,7 @@
 #extension GL_EXT_nonuniform_qualifier : enable
 
 layout(set = 2, binding = 0) readonly buffer VertexBuffers {
-    Vertex vertices[];
+    vec3 vertices[];
 } vertexBuffers[];
 
 layout(set = 2, binding = 1) readonly buffer IndexBuffers {
@@ -28,7 +28,7 @@ hitAttributeEXT vec3 attribs;
 
 void main() {
 
-    uint meshIndex = gl_InstanceID;
+    /*uint meshIndex = gl_InstanceID;
     uint primitiveIndex = gl_PrimitiveID;
     
     // Obtener los índices del triángulo
@@ -39,7 +39,7 @@ void main() {
     // Obtener los vértices del triángulo
     Vertex v0 = vertexBuffers[meshIndex].vertices[i0];
     Vertex v1 = vertexBuffers[meshIndex].vertices[i1];
-    Vertex v2 = vertexBuffers[meshIndex].vertices[i2];
+    Vertex v2 = vertexBuffers[meshIndex].vertices[i2];*/
 
     // Coordenadas barycéntricas del hit
     const vec3 barycentricCoords = vec3(1.0f - attribs.x - attribs.y, attribs.x, attribs.y);

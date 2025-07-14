@@ -264,7 +264,7 @@ namespace core {
 		bufferDeviceAddressFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 		bufferDeviceAddressFeatures.bufferDeviceAddress = VK_TRUE;
 
-		// Características de acceleration structure - ESTA ES LA CRÍTICA QUE FALTABA
+			
 		VkPhysicalDeviceAccelerationStructureFeaturesKHR asFeatures = {};
 		asFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
 		asFeatures.accelerationStructure = VK_TRUE;
