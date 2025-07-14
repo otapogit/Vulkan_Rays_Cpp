@@ -100,6 +100,7 @@ namespace core {
 			}
 			allBlas.clear();
 			CleanupMvpDescriptorSet();
+			CleanupGeometryDescriptorSet();
 
 			vkDestroyDescriptorPool(*m_device, m_rtDescPool, nullptr);
 			vkDestroyDescriptorSetLayout(*m_device, m_rtDescSetLayout, nullptr);
@@ -116,6 +117,9 @@ namespace core {
 
 		void createOutImage(int windowwidth, int windowheight, VulkanTexture* tex);
 		void UpdateAccStructure();
+
+		void createGeometryDescriptorSet(int maxsize = 10);
+		void updateGeometryDescriptorSet(const std::vector<core::SimpleMesh>& meshes);
 
 
 	private:
@@ -140,6 +144,14 @@ namespace core {
 		void CreateMvpBuffer();
 		void WriteMvpBuffer();
 
+		void CreateGeometryDescriptorPool(int numMeshes);
+		void CreateGeometryDescriptorSetLayout(int maxsize);
+		void AllocateGeometryDescriptorSet();
+		// Ya los tengo
+		void CreateGeometryBuffers(const std::vector<core::SimpleMesh>& meshes);
+		void WriteGeometryDescriptorSet();
+		void CleanupGeometryDescriptorSet();
+		
 
 		void saveImageToPNG(const std::string& filename, int width, int height);
 		void createStagingBuffer(VkDeviceSize size, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
@@ -195,6 +207,20 @@ namespace core {
 		VkDescriptorSetLayout m_mvpDescSetLayout;
 		VkDescriptorSet m_mvpDescSet;
 		BufferMemory m_mvpBufferMemory;
+
+		// Geometry descriptor set
+		VkDescriptorPool m_geometryDescPool;
+		VkDescriptorSetLayout m_geometryDescSetLayout;
+		VkDescriptorSet m_geometryDescSet;
+
+		// Buffers para geometry data
+		std::vector<BufferMemory> m_vertexBuffers;
+		std::vector<BufferMemory> m_indexBuffers;
+		std::vector<BufferMemory> m_normalBuffers;
+		std::vector<BufferMemory> m_textureIndexBuffers;
+		std::vector<VulkanTexture*> m_textures;
+
+		int m_maxsize = 10;
 
 		VkPipeline m_rtPipeline = VK_NULL_HANDLE;
 		VkPipelineLayout m_rtPipelineLayout = VK_NULL_HANDLE;

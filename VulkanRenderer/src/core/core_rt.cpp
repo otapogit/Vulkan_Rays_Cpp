@@ -38,6 +38,10 @@ namespace core {
         vkGetPhysicalDeviceProperties2(physdev.m_physDevice, &prop2);
     }
 
+#pragma region GeometryBuild
+
+
+
     //--------------------------------------------------------------------------------------------------
 // Convert an OBJ model into the ray tracing geometry used to build the BLAS
 //
@@ -494,6 +498,11 @@ namespace core {
 
         return sizeInfo;
     }
+#pragma endregion
+
+#pragma region RtDescsets
+
+
 
     void Raytracer::createRtDescriptorSet() {
         CreateRtDescriptorPool(1);
@@ -637,6 +646,11 @@ namespace core {
        
         vkUpdateDescriptorSets(*m_device, (uint32_t)WriteDescriptorSet.size(), WriteDescriptorSet.data(), 0, NULL);
     }
+#pragma endregion
+
+#pragma region MVPDescsets
+
+
 
     void Raytracer::createMvpDescriptorSet() {
         CreateMvpDescriptorPool(1);
@@ -742,6 +756,294 @@ namespace core {
     void Raytracer::UpdateMvpMatrix(const glm::mat4& mvpMatrix) {
         m_mvpBufferMemory.Update(*m_device, &mvpMatrix, sizeof(glm::mat4));
     }
+#pragma endregion
+
+#pragma region GeometryDescsets
+
+    void Raytracer::createGeometryDescriptorSet( int maxsize) {
+        m_maxsize = maxsize;
+        CreateGeometryDescriptorPool(maxsize);
+        CreateGeometryDescriptorSetLayout(maxsize);
+        AllocateGeometryDescriptorSet();
+
+    }
+    void Raytracer::CreateGeometryDescriptorPool(int numMeshes) {
+        // Calculamos el número de descriptors necesarios
+        // Por cada mesh: vertex buffer + index buffer + normal buffer + texture index buffer + texture sampler
+        std::vector<VkDescriptorPoolSize> poolSizes = {
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, static_cast<uint32_t>(numMeshes * 4)}, // vertex, index, normal, texture index
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, static_cast<uint32_t>(numMeshes)} // texturas
+        };
+
+        VkDescriptorPoolCreateInfo poolInfo{};
+        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+        poolInfo.maxSets = 1;
+        poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+        poolInfo.pPoolSizes = poolSizes.data();
+
+        if (vkCreateDescriptorPool(*m_device, &poolInfo, nullptr, &m_geometryDescPool) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create geometry descriptor pool!");
+        }
+    }
+
+    void Raytracer::CreateGeometryDescriptorSetLayout(int maxsize) {
+        std::vector<VkDescriptorSetLayoutBinding> bindings;
+
+        // Binding 0: Array de vertex buffers
+        VkDescriptorSetLayoutBinding vertexBinding{};
+        vertexBinding.binding = 0;
+        vertexBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        vertexBinding.descriptorCount = maxsize;
+        vertexBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        vertexBinding.pImmutableSamplers = nullptr;
+        bindings.push_back(vertexBinding);
+
+        // Binding 1: Array de index buffers
+        VkDescriptorSetLayoutBinding indexBinding{};
+        indexBinding.binding = 1;
+        indexBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        indexBinding.descriptorCount = maxsize;
+        indexBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        indexBinding.pImmutableSamplers = nullptr;
+        bindings.push_back(indexBinding);
+
+        // Binding 2: Array de normal buffers
+        VkDescriptorSetLayoutBinding normalBinding{};
+        normalBinding.binding = 2;
+        normalBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        normalBinding.descriptorCount = maxsize;
+        normalBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        normalBinding.pImmutableSamplers = nullptr;
+        bindings.push_back(normalBinding);
+
+        // Binding 3: Array de texture index buffers
+        VkDescriptorSetLayoutBinding textureIndexBinding{};
+        textureIndexBinding.binding = 3;
+        textureIndexBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        textureIndexBinding.descriptorCount = maxsize;
+        textureIndexBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        textureIndexBinding.pImmutableSamplers = nullptr;
+        bindings.push_back(textureIndexBinding);
+
+        // Binding 4: Array de texturas
+        VkDescriptorSetLayoutBinding textureBinding{};
+        textureBinding.binding = 4;
+        textureBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        textureBinding.descriptorCount = maxsize;
+        textureBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        textureBinding.pImmutableSamplers = nullptr;
+        bindings.push_back(textureBinding);
+
+        VkDescriptorSetLayoutCreateInfo layoutInfo{};
+        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+        layoutInfo.pBindings = bindings.data();
+
+        if (vkCreateDescriptorSetLayout(*m_device, &layoutInfo, nullptr, &m_geometryDescSetLayout) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create geometry descriptor set layout!");
+        }
+    }
+
+    void Raytracer::AllocateGeometryDescriptorSet() {
+        VkDescriptorSetAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool = m_geometryDescPool;
+        allocInfo.descriptorSetCount = 1;
+        allocInfo.pSetLayouts = &m_geometryDescSetLayout;
+
+        if (vkAllocateDescriptorSets(*m_device, &allocInfo, &m_geometryDescSet) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to allocate geometry descriptor set!");
+        }
+    }
+
+    void Raytracer::CreateGeometryBuffers(const std::vector<core::SimpleMesh>& meshes) {
+        // Limpiar buffers existentes
+        for (auto& buffer : m_vertexBuffers) {
+            buffer.Destroy(*m_device);
+        }
+        for (auto& buffer : m_indexBuffers) {
+            buffer.Destroy(*m_device);
+        }
+        for (auto& buffer : m_normalBuffers) {
+            buffer.Destroy(*m_device);
+        }
+        for (auto& buffer : m_textureIndexBuffers) {
+            buffer.Destroy(*m_device);
+        }
+
+        m_vertexBuffers.clear();
+        m_indexBuffers.clear();
+        m_normalBuffers.clear();
+        m_textureIndexBuffers.clear();
+
+        for (auto mesh : meshes) {
+            m_vertexBuffers.push_back(mesh.m_vb);
+            m_indexBuffers.push_back(mesh.m_indexbuffer);
+            m_normalBuffers.push_back(mesh.m_normalbuffer);
+            
+            BufferMemory texBuffer;
+            texBuffer = m_vkcore->CreateBufferBlas(sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+                                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            m_textureIndexBuffers.push_back(texBuffer);
+        }
+    }
+
+    void Raytracer::WriteGeometryDescriptorSet() {
+        std::vector<VkWriteDescriptorSet> descriptorWrites;
+
+        // Preparar buffer infos para cada tipo de buffer
+        std::vector<VkDescriptorBufferInfo> vertexBufferInfos;
+        std::vector<VkDescriptorBufferInfo> indexBufferInfos;
+        std::vector<VkDescriptorBufferInfo> normalBufferInfos;
+        std::vector<VkDescriptorBufferInfo> textureIndexBufferInfos;
+        std::vector<VkDescriptorImageInfo> imageInfos;
+
+        // Vertex buffers
+        for (const auto& buffer : m_vertexBuffers) {
+            VkDescriptorBufferInfo bufferInfo{};
+            bufferInfo.buffer = buffer.m_buffer;
+            bufferInfo.offset = 0;
+            bufferInfo.range = VK_WHOLE_SIZE;
+            vertexBufferInfos.push_back(bufferInfo);
+        }
+
+        // Index buffers
+        for (const auto& buffer : m_indexBuffers) {
+            VkDescriptorBufferInfo bufferInfo{};
+            bufferInfo.buffer = buffer.m_buffer;
+            bufferInfo.offset = 0;
+            bufferInfo.range = VK_WHOLE_SIZE;
+            indexBufferInfos.push_back(bufferInfo);
+        }
+
+        // Normal buffers
+        for (const auto& buffer : m_normalBuffers) {
+            VkDescriptorBufferInfo bufferInfo{};
+            bufferInfo.buffer = buffer.m_buffer;
+            bufferInfo.offset = 0;
+            bufferInfo.range = VK_WHOLE_SIZE;
+            normalBufferInfos.push_back(bufferInfo);
+        }
+
+        // Texture index buffers
+        for (const auto& buffer : m_textureIndexBuffers) {
+            VkDescriptorBufferInfo bufferInfo{};
+            bufferInfo.buffer = buffer.m_buffer;
+            bufferInfo.offset = 0;
+            bufferInfo.range = VK_WHOLE_SIZE;
+            textureIndexBufferInfos.push_back(bufferInfo);
+        }
+
+        // Texture samplers
+        for (const auto& texture : m_textures) {
+            VkDescriptorImageInfo imageInfo{};
+            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo.imageView = texture->m_view;
+            imageInfo.sampler = texture->m_sampler;
+            imageInfos.push_back(imageInfo);
+        }
+
+        // Write descriptor sets
+        VkWriteDescriptorSet vertexWrite{};
+        vertexWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        vertexWrite.dstSet = m_geometryDescSet;
+        vertexWrite.dstBinding = 0;
+        vertexWrite.dstArrayElement = 0;
+        vertexWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        vertexWrite.descriptorCount = static_cast<uint32_t>(vertexBufferInfos.size());
+        vertexWrite.pBufferInfo = vertexBufferInfos.data();
+        descriptorWrites.push_back(vertexWrite);
+
+        VkWriteDescriptorSet indexWrite{};
+        indexWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        indexWrite.dstSet = m_geometryDescSet;
+        indexWrite.dstBinding = 1;
+        indexWrite.dstArrayElement = 0;
+        indexWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        indexWrite.descriptorCount = static_cast<uint32_t>(indexBufferInfos.size());
+        indexWrite.pBufferInfo = indexBufferInfos.data();
+        descriptorWrites.push_back(indexWrite);
+
+        VkWriteDescriptorSet normalWrite{};
+        normalWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        normalWrite.dstSet = m_geometryDescSet;
+        normalWrite.dstBinding = 2;
+        normalWrite.dstArrayElement = 0;
+        normalWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        normalWrite.descriptorCount = static_cast<uint32_t>(normalBufferInfos.size());
+        normalWrite.pBufferInfo = normalBufferInfos.data();
+        descriptorWrites.push_back(normalWrite);
+
+        VkWriteDescriptorSet textureIndexWrite{};
+        textureIndexWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        textureIndexWrite.dstSet = m_geometryDescSet;
+        textureIndexWrite.dstBinding = 3;
+        textureIndexWrite.dstArrayElement = 0;
+        textureIndexWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        textureIndexWrite.descriptorCount = static_cast<uint32_t>(textureIndexBufferInfos.size());
+        textureIndexWrite.pBufferInfo = textureIndexBufferInfos.data();
+        descriptorWrites.push_back(textureIndexWrite);
+
+        VkWriteDescriptorSet textureWrite{};
+        textureWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        textureWrite.dstSet = m_geometryDescSet;
+        textureWrite.dstBinding = 4;
+        textureWrite.dstArrayElement = 0;
+        textureWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        textureWrite.descriptorCount = static_cast<uint32_t>(imageInfos.size());
+        textureWrite.pImageInfo = imageInfos.data();
+        descriptorWrites.push_back(textureWrite);
+
+        vkUpdateDescriptorSets(*m_device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+    }
+
+
+    void Raytracer::CleanupGeometryDescriptorSet() {
+        // Limpiar buffers
+        for (auto& buffer : m_vertexBuffers) {
+            buffer.Destroy(*m_device);
+        }
+        for (auto& buffer : m_indexBuffers) {
+            buffer.Destroy(*m_device);
+        }
+        for (auto& buffer : m_normalBuffers) {
+            buffer.Destroy(*m_device);
+        }
+        for (auto& buffer : m_textureIndexBuffers) {
+            buffer.Destroy(*m_device);
+        }
+
+        m_vertexBuffers.clear();
+        m_indexBuffers.clear();
+        m_normalBuffers.clear();
+        m_textureIndexBuffers.clear();
+
+        // Limpiar descriptor set
+        if (m_geometryDescSetLayout != VK_NULL_HANDLE) {
+            vkDestroyDescriptorSetLayout(*m_device, m_geometryDescSetLayout, nullptr);
+            m_geometryDescSetLayout = VK_NULL_HANDLE;
+        }
+        if (m_geometryDescPool != VK_NULL_HANDLE) {
+            vkDestroyDescriptorPool(*m_device, m_geometryDescPool, nullptr);
+            m_geometryDescPool = VK_NULL_HANDLE;
+        }
+    }
+
+    void Raytracer::updateGeometryDescriptorSet(const std::vector<core::SimpleMesh>& meshes) {
+        if (meshes.size() > m_maxsize) {
+            printf("\nMax size of meshes exceeded, stopping program\nFor more info consult Renderer initRT: method createGeometryDescriptorSet\nCurrent maximum size is %d\n", m_maxsize);
+            exit(1);
+        }
+
+        CreateGeometryBuffers(meshes);
+        WriteGeometryDescriptorSet();
+    }
+#pragma endregion
+
+#pragma region Utils
+
+
 
     // En tu archivo .cpp, implementa el método:
     void Raytracer::loadRayTracingFunctions() {
@@ -783,6 +1085,10 @@ namespace core {
             throw std::runtime_error("Failed to load ray tracing functions!");
         }
     }   
+
+#pragma endregion
+
+#pragma region Pipeline&Shaders
 
     void Raytracer::createOutImage(int windowwidth, int windowheight, VulkanTexture* tex) {
         VkFormat Format = VK_FORMAT_R8G8B8A8_UNORM;
@@ -861,8 +1167,8 @@ namespace core {
 
         // 3. Crear pipeline layout
         //Incluir aqui más sets si necesario
-        std::vector<VkDescriptorSetLayout> rtDescSetLayouts = { m_rtDescSetLayout, m_mvpDescSetLayout };
-        m_rtDescSets = { m_rtDescSet, m_mvpDescSet };
+        std::vector<VkDescriptorSetLayout> rtDescSetLayouts = { m_rtDescSetLayout, m_mvpDescSetLayout, m_geometryDescSetLayout };
+        m_rtDescSets = { m_rtDescSet, m_mvpDescSet, m_geometryDescSet };
 
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -961,6 +1267,13 @@ namespace core {
         printf("Shader binding table created successfully\n");
     }
 
+#pragma endregion
+
+#pragma region Rendering
+
+
+
+
     void Raytracer::raytrace(VkCommandBuffer cmdBuf, int width, int height) {
         // 1. Transición de imagen a layout correcto
         VkImageMemoryBarrier imageMemoryBarrier{};
@@ -992,6 +1305,8 @@ namespace core {
         vkCmdPipelineBarrier(cmdBuf, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
             0, 1, &memoryBarrier, 0, nullptr, 0, nullptr);
     }
+
+
 
     void Raytracer::render(int width, int height, bool saveImage, const std::string& filename) {
         VkCommandBuffer cmdBuf;
@@ -1137,5 +1452,5 @@ namespace core {
         }
         throw std::runtime_error("Failed to find suitable memory type!");
     }
-
+#pragma endregion
 }

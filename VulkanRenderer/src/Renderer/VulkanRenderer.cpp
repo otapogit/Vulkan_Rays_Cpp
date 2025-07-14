@@ -8,7 +8,6 @@
 #include <core/core_shader.h>
 
 #include <core/core_simple_mesh.h>
-#include <core/core_glfw.h>
 #include <core/core_rt.h>
 #include <core/core_vertex.h>
 #include "core/utils.h"
@@ -97,21 +96,12 @@ class VulkanRenderer : public Renderer {
 
         m_raytracer.createRtDescriptorSet();
         m_raytracer.createMvpDescriptorSet();
-
-        //std::vector<core::SimpleMesh> emptyMeshes;
-        //m_raytracer.createBottomLevelAS(emptyMeshes);
-        //m_raytracer.createTopLevelAS();
-        //m_raytracer.UpdateAccStructure();
+        m_raytracer.createGeometryDescriptorSet(50);
+  
 
         m_raytracer.createRtPipeline(rgen, rmiss, rchit);
         m_raytracer.createRtShaderBindingTable();
-        /*
-        vkGetMemoryWin32HandleKHR = (PFN_vkGetMemoryWin32HandleKHR)
-            vkGetDeviceProcAddr(m_device, "vkGetMemoryWin32HandleKHR");
 
-        if (!vkGetMemoryWin32HandleKHR) {
-            return false;
-        }*/
 
         return true;
     }
@@ -406,6 +396,7 @@ instances in the scene)
             m_raytracer.createBottomLevelAS(m_meshesDraw);
             m_raytracer.createTopLevelAS();
             m_raytracer.UpdateAccStructure();
+            m_raytracer.updateGeometryDescriptorSet(m_meshesDraw);
             if (!pipelineCreated) {
                 m_raytracer.createRtPipeline(rgen, rmiss, rchit);
                 m_raytracer.createRtShaderBindingTable();

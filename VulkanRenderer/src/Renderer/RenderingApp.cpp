@@ -4,7 +4,7 @@
 #include <vector>
 #include "core_fpcamera.h"
 
-struct Vertex {
+static struct Vertex {
 	Vertex(const glm::vec3& p, const glm::vec2& t, const glm::vec3& n) {
 		Pos = p;
 		Tex = t;
@@ -29,20 +29,50 @@ static uint32_t createMesh(const std::vector<Vertex>& vertices, const std::vecto
 	return renderer->defineMesh(vertData, normData, uvData, indices);
 }
 
-VulkanRenderApp::VulkanRenderApp(int WindowWidth, int WindowHeight) {
-	m_windowWidth = WindowWidth;
-	m_windowHeight = WindowHeight;
-}
-VulkanRenderApp::~VulkanRenderApp() {
-	// Limpia recursos aquí
-	if (m_pCamera) {
-		delete m_pCamera;
-		m_pCamera = nullptr;
+// PImpl Implementation class
+class VulkanRenderApp::Impl {
+public:
+	Impl(int windowWidth, int windowHeight)
+		: m_windowWidth(windowWidth), m_windowHeight(windowHeight), m_pCamera(nullptr) {}
+
+	~Impl() {
+		if (m_pCamera) {
+			delete m_pCamera;
+			m_pCamera = nullptr;
+		}
 	}
-	// Otros recursos que necesites limpiar
+
+	void initRt();
+	void loop();
+
+private:
+	void CreateCamera(glm::vec3 pos);
+	void CreateCamera(glm::vec3 pos, float FOV, float znear, float zfar);
+
+	CameraFirstPerson* m_pCamera;
+	float m_windowWidth, m_windowHeight;
+	VulkanRenderer renderer;
+};
+
+// Public interface implementation
+VulkanRenderApp::VulkanRenderApp(int WindowWidth, int WindowHeight)
+	: pImpl(std::make_unique<Impl>(WindowWidth, WindowHeight)) {
 }
 
+VulkanRenderApp::~VulkanRenderApp() = default;
+
+VulkanRenderApp::VulkanRenderApp(VulkanRenderApp&&) noexcept = default;
+VulkanRenderApp& VulkanRenderApp::operator=(VulkanRenderApp&&) noexcept = default;
+
 void VulkanRenderApp::initRt() {
+	pImpl->initRt();
+}
+
+void VulkanRenderApp::loop() {
+	pImpl->loop();
+}
+
+void VulkanRenderApp::Impl::initRt() {
 	CreateCamera(glm::vec3(1.f, 5.f, 1.f));
 
 	VulkanRenderer Renderer;
@@ -194,11 +224,11 @@ void VulkanRenderApp::initRt() {
 
 }
 
-void VulkanRenderApp::loop() {
+void VulkanRenderApp::Impl::loop() {
 
 }
 
- void VulkanRenderApp::CreateCamera(glm::vec3 pos) {
+ void VulkanRenderApp::Impl::CreateCamera(glm::vec3 pos) {
 
 	float FOV = 45.0f;
 	float znear = 0.1f;
@@ -207,7 +237,7 @@ void VulkanRenderApp::loop() {
 	printf("Created camera");
 }
 
-void VulkanRenderApp::CreateCamera(glm::vec3 pos, float FOV, float znear, float zfar) {
+void VulkanRenderApp::Impl::CreateCamera(glm::vec3 pos, float FOV, float znear, float zfar) {
 	if ((m_windowWidth == 0) || (m_windowHeight == 0)) {
 		printf("Invalid window dims");
 		exit(1);

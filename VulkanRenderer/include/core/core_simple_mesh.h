@@ -30,6 +30,7 @@ namespace core{
 		VkIndexType m_indexType = VK_INDEX_TYPE_UINT32;
 		int vertexcount = 0;
 		VulkanTexture* m_pTex = NULL;
+		uint32_t texIndex = 0;
 
 		void Destroy(VkDevice device) {
 			m_vb.Destroy(device);

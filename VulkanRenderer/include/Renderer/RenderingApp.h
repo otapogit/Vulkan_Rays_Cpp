@@ -1,17 +1,24 @@
 #pragma once
-#include "core_fpcamera.h"
-
+#include <memory>
+#include <glm/glm.hpp>
 
 class VulkanRenderApp {
 public:
-	VulkanRenderApp(int WindowWidth, int WindowHeight);
-	~VulkanRenderApp();
-	void initRt();
-	void loop();
+    VulkanRenderApp(int WindowWidth, int WindowHeight);
+    ~VulkanRenderApp();
+
+    // Disable copy constructor and assignment operator
+    VulkanRenderApp(const VulkanRenderApp&) = delete;
+    VulkanRenderApp& operator=(const VulkanRenderApp&) = delete;
+
+    // Enable move constructor and assignment operator
+    VulkanRenderApp(VulkanRenderApp&&) noexcept;
+    VulkanRenderApp& operator=(VulkanRenderApp&&) noexcept;
+
+    void initRt();
+    void loop();
+
 private:
-	void CreateCamera(glm::vec3 pos);
-	void CreateCamera(glm::vec3 pos, float FOV, float znear, float zfar);
-	CameraFirstPerson* m_pCamera = NULL;
-	float m_windowWidth, m_windowHeight;
-	//VulkanRenderer Renderer;
+    class Impl;
+    std::unique_ptr<Impl> pImpl;
 };
