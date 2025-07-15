@@ -7,14 +7,13 @@ find_package(OpenGL REQUIRED)
 # Find GLEW para extensiones OpenGL
     FetchContent_Declare(
         glew
-        URL https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip
-        URL_HASH SHA256=a9046a913774395a095edcc0b0ac2d81c3aacca61787b39839b941e9be14e0d4
+        URL https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0-win32.zip
     )
     FetchContent_MakeAvailable(glew)
     
     # Configurar GLEW manualmente
     set(GLEW_INCLUDE_DIRS ${glew_SOURCE_DIR}/include)
-    set(GLEW_LIBRARIES ${glew_SOURCE_DIR}/lib/Release/x64/glew32.lib)
+    set(GLEW_LIBRARIES ${glew_SOURCE_DIR}/lib/Release/x64/glew32s.lib)
     
     # Crear target si no existe
     if(NOT TARGET GLEW::GLEW)
