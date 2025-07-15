@@ -14,5 +14,9 @@ target_link_libraries(GLFWFrontEnd
     PRIVATE glfw
 )
 
+set_target_properties(GLFWFrontEnd PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+)
+
 target_compile_features(GLFWFrontEnd PRIVATE cxx_std_17)
 

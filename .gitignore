@@ -419,3 +419,4 @@ CMakeCache.txt
 include/glslang
 *.cmake
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio
+Test1.png
