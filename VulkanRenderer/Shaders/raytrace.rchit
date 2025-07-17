@@ -41,7 +41,7 @@ void main() {
     Vertex v1 = vertexBuffers[meshIndex].vertices[i1];
     Vertex v2 = vertexBuffers[meshIndex].vertices[i2];*/
 
-    // Coordenadas barycéntricas del hit
+    // Coordenadas barycéntricas del hit    
     const vec3 barycentricCoords = vec3(1.0f - attribs.x - attribs.y, attribs.x, attribs.y);
     
     // Color basado en coordenadas barycéntricas (para visualización)

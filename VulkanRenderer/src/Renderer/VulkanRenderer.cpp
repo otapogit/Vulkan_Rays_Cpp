@@ -228,6 +228,7 @@ the scene with Renderer::addMesh
      void deleteTexture(TextureId tid) override {
         for(uint32_t i = 0; i < texturesC.size(); i++) {
             if (texturesC[i]->id == tid) {
+                texturesC[i]->Destroy(m_vkcore.GetDevice());
                 texturesC.erase(texturesC.begin() + i);
                 return;
             }
