@@ -87,9 +87,9 @@ class VulkanRenderer : public Renderer {
 
         m_outTexture = new core::VulkanTexture();
 
-        rgen = core::CreateShaderModuleFromText(m_vkcore.GetDevice(), "VulkanRenderer/Shaders/raytrace.rgen");
-        rmiss = core::CreateShaderModuleFromText(m_vkcore.GetDevice(), "VulkanRenderer/Shaders/raytrace.rmiss");
-        rchit = core::CreateShaderModuleFromText(m_vkcore.GetDevice(), "VulkanRenderer/Shaders/raytrace.rchit");
+        rgen = core::CreateShaderModuleFromText(m_vkcore.GetDevice(), "../VulkanRenderer/Shaders/raytrace.rgen");
+        rmiss = core::CreateShaderModuleFromText(m_vkcore.GetDevice(), "../VulkanRenderer/Shaders/raytrace.rmiss");
+        rchit = core::CreateShaderModuleFromText(m_vkcore.GetDevice(), "../VulkanRenderer/Shaders/raytrace.rchit");
 
         m_raytracer.initRayTracing(m_vkcore.GetSelectedPhysicalDevice(), &m_device);
         m_raytracer.setup(m_vkcore.GetCommandPool(), &m_vkcore);

@@ -110,6 +110,7 @@ namespace core {
 		CreateDevice();
 		// ELIMINAR: CreateSwapChain();
 		CreateOffscreenImages(); // NUEVA FUNCIón
+								//Falta destruir estas creo
 		CreateCommandBufferPool();
 		m_queue.Init(m_device, VK_NULL_HANDLE, m_queueFamily, 0); // Cambiar m_swapChain por VK_NULL_HANDLE
 		CreateCommandBuffer(1, &m_copyCmdBuf);
@@ -129,6 +130,7 @@ namespace core {
 		for (uint32_t i = 0; i < pCallbackData->objectCount; i++) {
 			printf("%llx ", pCallbackData->pObjects[i].objectHandle);
 		}
+		printf("\n");
 		return VK_FALSE;
 	}
 

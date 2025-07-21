@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <Renderer/RenderingApp.h>
 
+
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
 // this function will be called internally by GLFW whenever an error occur.
