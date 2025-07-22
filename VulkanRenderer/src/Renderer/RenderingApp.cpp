@@ -1,5 +1,5 @@
 #include "Renderer/RenderingApp.h"
-#include "VulkanRenderer.cpp"
+#include "Renderer/VulkanRenderer.h"
 #include <GL/glew.h>
 #include <vector>
 #include "core_fpcamera.h"
@@ -213,7 +213,7 @@ void VulkanRenderApp::Impl::initRt() {
 	//Renderer.setCamera(glm::mat4(1.0f), glm::mat4(1.0f));
 	Renderer.setOutputResolution(800, 800);
 
-	Renderer.save(true);
+	//Renderer.save(true);
 
 	Renderer.render();
 	printf("Rendered everything\n");

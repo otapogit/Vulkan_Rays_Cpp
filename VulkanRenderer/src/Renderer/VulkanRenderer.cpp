@@ -1,5 +1,6 @@
 #pragma once
-#include "Renderer.h"
+
+
 #ifdef WIN32
 #include <windows.h>  // Necesario en Windows antes de OpenGL
 #endif
@@ -17,8 +18,17 @@
 
 
 #include <GL/glew.h>
+#include <GL/wglew.h>
+
+#include "Renderer/VulkanRenderer.h"
+#ifdef _WIN32
+#include <GLFW/glfw3native.h>  // Importante: debes incluir esto
+#endif
+#include <GLFW/glfw3.h>
 #include <GL/gl.h>      // Para funciones básicas de OpenGL
 #include <GL/glu.h>     // Para funciones de utilidad (opcional)
+
+
 
 #include <stdexcept>
 
@@ -41,13 +51,13 @@
 //#include <GL/glext.h>   // Para extensiones
 
 
-class VulkanRenderer : public Renderer {
+class VulkanRenderer::Impl {
     public:
-    VulkanRenderer() {
-
+        Impl() {
+           
     }
 
-     ~VulkanRenderer()  {
+     ~Impl()  {
         vkDestroyShaderModule(m_vkcore.GetDevice(), rgen, nullptr);
         vkDestroyShaderModule(m_vkcore.GetDevice(), rmiss, nullptr);
         vkDestroyShaderModule(m_vkcore.GetDevice(), rchit, nullptr);
@@ -64,13 +74,14 @@ class VulkanRenderer : public Renderer {
         m_raytracer.cleanup();
         vkDestroyRenderPass(m_vkcore.GetDevice(), m_renderPass, NULL);
         m_outTexture->Destroy(m_vkcore.GetDevice());
+        
     }
 
     /**
      * @brief Initializes the underlying graphics library (GL, Vulkan...)
      * @return true, if succeeded
      */
-    virtual bool init() override {
+     bool init()  {
         //Esto primero tiene que irse
         //m_pWindow = core::glwf_vulkan_init(1080, 1080, "AppName");
         m_vkcore.Init("AppName", 1920,1080);
@@ -120,7 +131,7 @@ the scene with Renderer::addMesh
         const std::vector<glm::vec3>& vtcs,
         const std::vector<glm::vec3>& nrmls,
         const std::vector<glm::vec2>& uv,
-        const std::vector<uint32_t> inds) override {
+        const std::vector<uint32_t> inds)  {
 
         core::SimpleMesh mesh;
         //mesh.m_vertexBufferSize = sizeof(vtcs[0]) * vtcs.size();
@@ -163,7 +174,7 @@ the scene with Renderer::addMesh
      * @return false if the mesh id does not exists
      */
      bool addMesh(const glm::mat4& modelMatrix, const glm::vec3
-        & color, MeshId id) override {
+        & color, MeshId id)  {
         dirtyupdate = true;
 
         int tid = -1;
@@ -215,7 +226,7 @@ the scene with Renderer::addMesh
 
 
      TextureId addTexture(uint8_t* texels, uint32_t width,
-        uint32_t height, uint32_t bpp) override {
+        uint32_t height, uint32_t bpp)  {
         //Para esto usar los pushconstants??
         core::VulkanTexture* tex = new core::VulkanTexture();
         VkFormat Format = VK_FORMAT_R8G8B8A8_UNORM;
@@ -225,7 +236,7 @@ the scene with Renderer::addMesh
         return tex->id;
     }
 
-     void deleteTexture(TextureId tid) override {
+     void deleteTexture(TextureId tid)  {
         for(uint32_t i = 0; i < texturesC.size(); i++) {
             if (texturesC[i]->id == tid) {
                 texturesC[i]->Destroy(m_vkcore.GetDevice());
@@ -237,7 +248,7 @@ the scene with Renderer::addMesh
     }
 
      bool addLight(const glm::mat4& modelMatrix, MeshId id,
-        const glm::vec3& color, LightId lid, TextureId tid = 0) override {
+        const glm::vec3& color, LightId lid, TextureId tid = 0) {
         //pasarle la textura la id y tal
 
         return addMesh(modelMatrix, color, id);
@@ -249,7 +260,7 @@ instances in the scene)
       * @param id
       * @return false if the mesh id does not exists
       */
-     bool removeMesh(MeshId id) override{
+     bool removeMesh(MeshId id) {
         for (int i = 0; i < m_meshesDraw.size(); i++) {
             if (m_meshesDraw[i].id == id) {
                 dirtyupdate = true;
@@ -264,7 +275,7 @@ instances in the scene)
     /**
      * @brief removes all the meshes from the scene
      */
-     void clearScene() override{
+     void clearScene() {
         dirtyupdate = true;
         m_meshesDraw = {};
     }
@@ -275,7 +286,7 @@ instances in the scene)
      * @param projMatrix
      */
      void setCamera(const glm::mat4& viewMatrix, const
-        glm::mat4& projMatrix) override{
+        glm::mat4& projMatrix) {
         VP = projMatrix * viewMatrix;
         VP = glm::affineInverse(VP);
         //Updatear el buffer que esta en el descriptor set
@@ -287,7 +298,7 @@ instances in the scene)
      * @param width
      * @param height
      */
-     void setOutputResolution(uint32_t width, uint32_t height) override{
+     void setOutputResolution(uint32_t width, uint32_t height) {
         windowwidth = width;
         windowheight = height;
         m_raytracer.createOutImage(windowwidth, windowheight, m_outTexture);
@@ -300,7 +311,7 @@ instances in the scene)
      * @brief Renders the scene. The result can be obtained with Renderer::copyResultBytes or Renderer::getResultTextureId
       * @return
       */
-     bool render() override{
+     bool render() {
         //Antes de entregar quitar ek guardar en png
         if (dirtyupdate) {
             updateMeshes();
@@ -317,7 +328,7 @@ instances in the scene)
      * @param bufferSize size of buffer
      * @return the number of bytes written to buffer
      */
-     size_t copyResultBytes(uint8_t* buffer, size_t bufferSize) override{
+     size_t copyResultBytes(uint8_t* buffer, size_t bufferSize) {
         return m_vkcore.copyResultBytes(buffer, bufferSize, m_outTexture, windowwidth, windowheight);
     }
 
@@ -326,12 +337,14 @@ instances in the scene)
      * @return the GL? object Id (0 if there is not a texture, or it is
      *   not compatible with GL)
      */
-     uint32_t getResultTextureId() override{
+     uint32_t getResultTextureId() {
         //Mirar el interop
-         /*
+         
          if (!m_outTexture || !m_outTexture->m_mem) {
              return 0;
          }
+
+
         // 
          try {
             #ifdef WIN32
@@ -344,6 +357,42 @@ instances in the scene)
              handleInfo.memory = m_outTexture->m_mem;
              handleInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
 
+             
+
+             PFN_vkGetMemoryWin32HandleKHR vkGetMemoryWin32HandleKHR = (PFN_vkGetMemoryWin32HandleKHR)
+                 vkGetDeviceProcAddr(m_device, "vkGetMemoryWin32HandleKHR");
+             PFNGLCREATEMEMORYOBJECTSEXTPROC glCreateMemoryObjectsEXT = (PFNGLCREATEMEMORYOBJECTSEXTPROC)
+                 wglGetProcAddress("glCreateMemoryObjectsEXT");
+             PFNGLDELETEMEMORYOBJECTSEXTPROC glDeleteMemoryObjectsEXT = (PFNGLDELETEMEMORYOBJECTSEXTPROC)
+                 wglGetProcAddress("glDeleteMemoryObjectsEXT");
+             PFNGLTEXTURESTORAGEMEM2DEXTPROC glTextureStorageMem2DEXT = (PFNGLTEXTURESTORAGEMEM2DEXTPROC)
+                 wglGetProcAddress("glTextureStorageMem2DEXT");
+             PFNGLCREATETEXTURESPROC glCreateTextures = (PFNGLCREATETEXTURESPROC)
+                 wglGetProcAddress("glCreateTextures");
+             PFNGLIMPORTMEMORYWIN32HANDLEEXTPROC glImportMemoryWin32HandleEXT = (PFNGLIMPORTMEMORYWIN32HANDLEEXTPROC)
+                 wglGetProcAddress("glImportMemoryWin32HandleEXT");
+
+             if (!glCreateMemoryObjectsEXT) {
+                 std::cerr << "No se pudo cargar glCreateMemoryObjectsEXT" << std::endl;
+                 return 0;
+             }
+             if (!vkGetMemoryWin32HandleKHR) {
+                 std::cerr << "No se pudo cargar vkGetMemoryWin32HandleKHR" << std::endl;
+                 return 0;
+             }
+             if (!glTextureStorageMem2DEXT) {
+                 std::cerr << "No se pudo cargar glTextureStorageMem2DEXT" << std::endl;
+                 return 0;
+             }
+             if (!glCreateTextures) {
+                 std::cerr << "No se pudo cargar glCreateTextures" << std::endl;
+                 return 0;
+             }
+             if (!glImportMemoryWin32HandleEXT) {
+                 std::cerr << "No se pudo cargar glImportMemoryWin32HandleEXT" << std::endl;
+                 return 0;
+             }
+
              HANDLE memoryHandle;
              VkResult result = vkGetMemoryWin32HandleKHR(m_device, &handleInfo, &memoryHandle);
              if (result != VK_SUCCESS) {
@@ -353,14 +402,20 @@ instances in the scene)
              // En OpenGL - importar memoria
              GLuint memoryObject;
              glCreateMemoryObjectsEXT(1, &memoryObject);
+             checkGLError("glCreateMemoryObjectsEXT");
              glImportMemoryWin32HandleEXT(memoryObject, memReqs.size, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, memoryHandle);
-             
+             checkGLError("glImportMemoryWin32HandleEXT");
+             GLint dedicated = GL_TRUE;
+             glMemoryObjectParameterivEXT(memoryObject, GL_DEDICATED_MEMORY_OBJECT_EXT, &dedicated);
             #else
              // Linux - exportar file descriptor
              VkMemoryGetFdInfoKHR fdInfo = {};
              fdInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR;
              fdInfo.memory = m_outTexture->m_mem;
              fdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+
+             PFN_vkGetMemoryFdKHR vkGetMemoryFdKHR = (PFN_vkGetMemoryFdKHR)
+                 vkGetDeviceProcAddr(m_device, "vkGetMemoryFdKHR");
 
              int memoryFd;
              VkResult result = vkGetMemoryFdKHR(m_device, &fdInfo, &memoryFd);
@@ -374,21 +429,27 @@ instances in the scene)
              glImportMemoryFdEXT(memoryObject, memReqs.size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, memoryFd);
             #endif
 
+             glfwMakeContextCurrent(m_pWindow);
              // Crear textura OpenGL
              GLuint texture = 0;
-             glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+             glGenTextures(1, &texture);
+             glBindTexture(GL_TEXTURE_2D, texture);
+             checkGLError("glCreateTextures");
              glTextureStorageMem2DEXT(texture, 1, GL_RGBA8, windowwidth, windowheight, memoryObject, 0);
+             checkGLError("glTextureStorageMem2DEXT");
+
              return (uint32_t)texture;
          }
          catch (...) {
              return 0;
-         }*/
+         }
          return 0;
 
     }
 
-     void save(bool s) {
+     void save(bool s, GLFWwindow* window) {
          saving = s;
+         m_pWindow = window;
      }
 
     private:
@@ -406,12 +467,19 @@ instances in the scene)
 
         }
 
+        void checkGLError(const char* operation) {
+            GLenum error = glGetError();
+            if (error != GL_NO_ERROR) {
+                std::cerr << "Error OpenGL en " << operation << ": " << error << std::endl;
+            }
+        }
+
         core::VulkanQueue* m_pQueue;
         core::VulkanCore m_vkcore;
         VkDevice m_device = NULL;
         int m_numImages = 0;
         std::vector<VkCommandBuffer> m_cmdBufs;
-        //GLFWwindow* m_pWindow;
+        GLFWwindow* m_pWindow;
         VkRenderPass m_renderPass;
         std::vector<VkFramebuffer> m_frameBuffers;
 
@@ -444,3 +512,72 @@ instances in the scene)
         //PFN_vkGetMemoryWin32HandleKHR vkGetMemoryWin32HandleKHR = nullptr;
         //PFN_vkGetMemoryWin32HandleKHR vkGetMemoryWin32HandleKHR;
 };
+using MeshId = uint32_t;
+using TextureId = uint32_t;
+using LightId = uint32_t;
+
+VulkanRenderer::VulkanRenderer() : pImpl(std::make_unique<Impl>()) {}
+
+VulkanRenderer::~VulkanRenderer() = default;
+
+VulkanRenderer::VulkanRenderer(VulkanRenderer&&) noexcept = default;
+VulkanRenderer& VulkanRenderer::operator=(VulkanRenderer&&) noexcept = default;
+
+bool VulkanRenderer::init() {
+    return pImpl->init();
+}
+
+MeshId VulkanRenderer::defineMesh(const std::vector<glm::vec3>& vtcs,
+    const std::vector<glm::vec3>& nrmls,
+    const std::vector<glm::vec2>& uv,
+    const std::vector<uint32_t> inds) {
+    return pImpl->defineMesh(vtcs, nrmls, uv, inds);
+}
+
+bool VulkanRenderer::addMesh(const glm::mat4& modelMatrix, const glm::vec3& color, MeshId id) {
+    return pImpl->addMesh(modelMatrix, color, id);
+}
+
+TextureId VulkanRenderer::addTexture(uint8_t* texels, uint32_t width, uint32_t height, uint32_t bpp) {
+    return pImpl->addTexture(texels, width, height, bpp);
+}
+
+void VulkanRenderer::deleteTexture(TextureId tid) {
+    pImpl->deleteTexture(tid);
+}
+
+bool VulkanRenderer::addLight(const glm::mat4& modelMatrix, MeshId id, const glm::vec3& color, LightId lid, TextureId tid) {
+    return pImpl->addLight(modelMatrix, id, color, lid, tid);
+}
+
+bool VulkanRenderer::removeMesh(MeshId id) {
+    return pImpl->removeMesh(id);
+}
+
+void VulkanRenderer::clearScene() {
+    pImpl->clearScene();
+}
+
+void VulkanRenderer::setCamera(const glm::mat4& viewMatrix, const glm::mat4& projMatrix) {
+    pImpl->setCamera(viewMatrix, projMatrix);
+}
+
+void VulkanRenderer::setOutputResolution(uint32_t width, uint32_t height) {
+    pImpl->setOutputResolution(width, height);
+}
+
+bool VulkanRenderer::render() {
+    return pImpl->render();
+}
+
+size_t VulkanRenderer::copyResultBytes(uint8_t* buffer, size_t bufferSize) {
+    return pImpl->copyResultBytes(buffer, bufferSize);
+}
+
+uint32_t VulkanRenderer::getResultTextureId() {
+    return pImpl->getResultTextureId();
+}
+
+void VulkanRenderer::save(bool s, GLFWwindow* window) {
+    pImpl->save(s,window);
+}
