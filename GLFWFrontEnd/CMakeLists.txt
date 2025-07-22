@@ -15,20 +15,20 @@ target_include_directories(GLFWFrontEnd
 )
 
 # PGUPV - Descargar desde GitHub
-#FetchContent_Declare(
-#    pgupv
-#    GIT_REPOSITORY https://github.com/fjabad/pgupv.git
-#    GIT_TAG        master  # o main, dependiendo de la rama principal
-#)
+FetchContent_Declare(
+    pgupv
+    GIT_REPOSITORY https://github.com/fjabad/pgupv.git
+    GIT_TAG        master  # o main, dependiendo de la rama principal
+)
 
 # Hacer disponible PGUPV
-#FetchContent_MakeAvailable(pgupv)
+FetchContent_MakeAvailable(pgupv)
 
-find_library(PGUPV_LIB
-    NAMES PGUPVd PGUPV pgupvd pgupv
-    PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../_deps/PGUPV/
-    NO_DEFAULT_PATH
-)
+#find_library(PGUPV_LIB
+#    NAMES PGUPVd PGUPV pgupvd pgupv
+#    PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../_deps/PGUPV/
+#    NO_DEFAULT_PATH
+#)
 
     
 
@@ -37,7 +37,7 @@ target_link_libraries(GLFWFrontEnd
     PRIVATE VulkanRenderer
     PRIVATE GLRenderer
     PRIVATE glfw
-    PRIVATE ${PGUPV_LIB}
+    PRIVATE PGUPV
 )
 
 

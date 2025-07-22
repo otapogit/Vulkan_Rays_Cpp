@@ -3,7 +3,9 @@
 
 #include <GLFW/glfw3.h>
 #include <Renderer/RenderingApp.h>
+#include "PGUPV.h"
 
+using namespace PGUPV;
 
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
