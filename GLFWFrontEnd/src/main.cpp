@@ -23,6 +23,7 @@
 #define GLFW_INCLUDE_VULKAN
 
 #include "3rdParty/stb_image.h"
+#include "glfwcamera.h"
 
 // Función para manejar errores de GLFW
 void error_callback(int error, const char* description) {
@@ -266,6 +267,9 @@ int main(int argc, char* argv[]) {
     // Activar v-sync
     glfwSwapInterval(1);
 
+    CreateCamera(glm::vec3(0.f, 0.f, 5.f));
+    CameraGLFWController::setupCallbacks(window, &camera);
+
     m_Renderer.init();
     initRT();
     m_Renderer.setOutputResolution(m_windowwidth, m_windowheight);
@@ -342,7 +346,7 @@ int main(int argc, char* argv[]) {
 }
 
 void initRT(){
-    CreateCamera(glm::vec3(1.f, 5.f, 1.f));
+    
 
 
 
