@@ -1,7 +1,6 @@
 #include "core_fpcamera.h"
-//#include <GLFW/glfw3.h>
-
-/*bool CameraFirstPerson::GLFWCameraHandler(CameraMovement& movement, int Key, int Action, int Mods) {
+#include <GLFW/glfw3.h>
+bool CameraFirstPerson::GLFWCameraHandler(CameraMovement& movement, int Key, int Action, int Mods) {
 
 	bool Press = Action != GLFW_RELEASE;
 
@@ -32,7 +31,7 @@
 	}
 
 	return Handled;
-}*/
+}
 
 
 CameraFirstPerson::CameraFirstPerson(const glm::vec3& Pos, const glm::vec3& Target,

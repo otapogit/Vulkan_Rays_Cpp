@@ -15,6 +15,8 @@
 
 #include <GL/gl.h>
 
+#include <3rdParty/stb_image_write.h>
+
 //using namespace PGUPV;
 
 #define GLFW_INCLUDE_NONE
@@ -102,6 +104,48 @@ GLuint loadTexture(const char* imagePath) {
     return textureID;
 }
 
+GLuint createTextureFromData(uint8_t* data, int width, int height, int channels) {
+    if (!data) {
+        std::cerr << "Error: Datos de imagen nulos" << std::endl;
+        return 0;
+    }
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // Configurar parámetros de la textura
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    GLint internalFormat;
+    GLenum format;
+    if (channels == 1) {
+        internalFormat = GL_R8;
+        format = GL_RED;
+    }
+    else if (channels == 3) {
+        internalFormat = GL_RGB8;
+        format = GL_RGB;
+    }
+    else if (channels == 4) {
+        internalFormat = GL_RGBA8;
+        format = GL_RGBA;
+    }
+    else {
+        std::cerr << "Error: Formato de imagen no soportado" << std::endl;
+        return 0;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+    std::cout << "Textura creada desde datos del renderer: " << width << "x" << height << ", " << channels << " canales" << std::endl;
+
+    return textureID;
+}
+
 void checkGLError(const char* operation) {
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
@@ -111,10 +155,22 @@ void checkGLError(const char* operation) {
 
 // Función para dibujar un cuadrado que ocupe toda la pantalla con textura
 void renderTexturedQuad(GLuint textureID) {
+
+    if (!glIsTexture(textureID)) {
+        std::cerr << "Error: Textura inválida: " << textureID << std::endl;
+        return;
+    }
+
+    std::cout << "textureID valid? " << glIsTexture(textureID) << std::endl;
+    GLint boundTex = 0;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &boundTex);
+    std::cout << "GL_TEXTURE_BINDING_2D: " << boundTex << std::endl;
+
     // Activar textura
     glEnable(GL_TEXTURE_2D);
+    //checkGLError("glEnable");
     glBindTexture(GL_TEXTURE_2D, textureID);
-
+    checkGLError("bind texture in quad");
     // Dibujar cuadrado que ocupa toda la pantalla
     glBegin(GL_QUADS);
     // Vértice inferior izquierdo
@@ -134,8 +190,8 @@ void renderTexturedQuad(GLuint textureID) {
     glTexCoord2f(0.0f, 1.0f);
     glVertex2f(-1.0f, -1.0f);
     glEnd();
-
     glDisable(GL_TEXTURE_2D);
+
 }
 
 VulkanRenderer m_Renderer;
@@ -145,12 +201,8 @@ CameraFirstPerson* m_pCamera;
 int main(int argc, char* argv[]) {
 
 
-    const char* imagePath = "C:/Cositas/Universi/Master/copiaProyectoTFM/Vulkan_Rays_Cpp/GLFWFrontEnd/Test1.png";
-
     // Configurar callback de errores de GLFW
     glfwSetErrorCallback(error_callback);
-
-
 
     // Inicializar GLFW
     if (!glfwInit()) {
@@ -160,11 +212,11 @@ int main(int argc, char* argv[]) {
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     // Crear ventana
-    m_windowwidth = 800; m_windowheight = 600;
+    m_windowwidth = 800; m_windowheight = 800;
     GLFWwindow* window = glfwCreateWindow(m_windowwidth, m_windowheight, "OpenGL: Textura en Cuadrado", NULL, NULL);
 
 
@@ -181,15 +233,6 @@ int main(int argc, char* argv[]) {
     // Hacer la ventana actual
     glfwMakeContextCurrent(window);
 
-    /*int attribs[] = {
-    WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-    WGL_CONTEXT_MINOR_VERSION_ARB, 6,
-    WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-    0
-    };
-
-    HGLRC context = wglCreateContextAttribsARB(hDC, 0, attribs);
-    wglMakeCurrent(hDC, context);*/
 
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
@@ -225,38 +268,45 @@ int main(int argc, char* argv[]) {
 
     m_Renderer.init();
     initRT();
-
+    m_Renderer.setOutputResolution(m_windowwidth, m_windowheight);
     m_Renderer.save(true, window);
     m_Renderer.render();
+
     glfwMakeContextCurrent(window);
-    GLuint texture;
-    glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-    std::cout << "Dummy texture at: " << texture << std::endl;
-    checkGLError("glCreateTextures 1");
-    GLuint textureID = m_Renderer.getResultTextureId();
+    
+    // Calcula el tamaño del buffer necesario (RGBA, 4 bytes por píxel)
+    size_t bufferSize = m_windowwidth * m_windowheight * (4 + 1);
+    uint8_t* imageBuffer = new uint8_t[bufferSize];
 
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    // Copia los bytes del resultado del renderer
+    size_t bytesWritten = m_Renderer.copyResultBytes(imageBuffer, bufferSize);
 
-    // Configurar parámetros
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    /*
-    // Cargar la textura
-    GLuint textureID = loadTexture(imagePath);
-    if (textureID == 0) {
-        std::cerr << "Error: No se pudo cargar la textura" << std::endl;
+    if (bytesWritten == 0) {
+        std::cerr << "Error: No se pudieron copiar los bytes del resultado" << std::endl;
+        delete[] imageBuffer;
         glfwTerminate();
-        return -3;
+        return -5;
     }
-    */
+
+    printf("Datos copiados al bufer\n");
+    // Crea la textura OpenGL usando los datos copiados
+    GLuint textureID = createTextureFromData(imageBuffer, m_windowwidth, m_windowheight, 4);
+
+
+    checkGLError("glBindTexture");
+    // Configurar parámetros
+
+    
+    if (!glIsTexture(textureID)) {
+        std::cerr << "Textura no válida después de getResultTextureId" << std::endl;
+    }
+
     printf("texture created at: %zd\n", textureID);
     std::cout << "Textura cargada" << std::endl;
 
     // Configurar OpenGL
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Fondo negro
-    glEnable(GL_TEXTURE_2D);
+    //glEnable(GL_TEXTURE_2D);
 
     std::cout << "Aplicación iniciada. Presiona ESC para salir." << std::endl;
 
@@ -272,15 +322,19 @@ int main(int argc, char* argv[]) {
 
         // Limpiar pantalla
         glClear(GL_COLOR_BUFFER_BIT);
+        printf("Cleared screen\n");
 
         // Dibujar el cuadrado con textura
         renderTexturedQuad(textureID);
+        printf("Rendered quad\n");
 
         // Intercambiar buffers
         glfwSwapBuffers(window);
     }
-
+    delete[] imageBuffer;
     // Limpiar recursos
+    //glDeleteTextures(1, &texture);
+    //glDeleteTextures(1, &textureID2);
     glDeleteTextures(1, &textureID);
     glfwTerminate();
 
@@ -422,16 +476,8 @@ void initRT(){
 
     m_Renderer.setCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
     //m_Renderer.setCamera(glm::mat4(1.0f), glm::mat4(1.0f));
-    m_Renderer.setOutputResolution(800, 800);
-
-
-
 
     printf("Rendered everything\n");
-
-
-    
-
 }
 
 void CreateCamera(glm::vec3 pos) {

@@ -951,7 +951,7 @@ namespace core {
 	}
 	void VulkanCore::CreateTextureImage(VulkanTexture& Tex, uint32_t ImageWidth, uint32_t ImageHeight, VkFormat TexFormat) {
 		VkImageUsageFlagBits Usage = (VkImageUsageFlagBits)(VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-			VK_IMAGE_USAGE_STORAGE_BIT| VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+			VK_IMAGE_USAGE_STORAGE_BIT| VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 		//device local es en la gpu
 		VkMemoryPropertyFlagBits PropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		CreateImage(Tex, ImageWidth, ImageHeight, TexFormat, Usage, PropertyFlags);
@@ -1151,58 +1151,70 @@ namespace core {
 			return 0;
 		}
 
-		// Obtener las propiedades de la imagen
-		VkImageSubresource subresource = {};
-		subresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		subresource.mipLevel = 0;
-		subresource.arrayLayer = 0;
-
-		VkSubresourceLayout layout;
-		vkGetImageSubresourceLayout(m_device, tex->m_image, &subresource, &layout);
+		// Calcular el tamaño de la imagen (asumiendo RGBA, 4 bytes por pixel)
+		VkDeviceSize imageSize = width * height * 4;
 
 		// Verificar si el buffer es suficientemente grande
-		if (bufferSize < layout.size) {
+		if (bufferSize < imageSize) {
 			printf("Buffer size insufficient. Required: %zu, Available: %zu\n",
-				(size_t)layout.size, bufferSize);
+				(size_t)imageSize, bufferSize);
 			return 0;
 		}
 
-		// Crear un buffer de staging para copiar la imagen
-		VkBufferUsageFlags usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-		VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-		BufferMemory stagingBuffer = CreateBuffer(layout.size, usage, properties);
+		// Crear staging buffer
+		BufferMemory stagingBuffer = CreateBuffer(imageSize,
+			VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 		// Transicionar la imagen al layout apropiado para lectura
 		TransitionImageLayout(tex->m_image, VK_FORMAT_R8G8B8A8_UNORM,
 			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
-		// Copiar la imagen al buffer de staging
-		CopyImageToBuffer(tex->m_image, stagingBuffer.m_buffer, layout, width, height);
+		// Comenzar command buffer para la operación de copia
+		BeginCommandBuffer(m_copyCmdBuf, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+		// Configurar la región de copia
+		VkBufferImageCopy region = {};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = 1;
+		region.imageOffset = { 0, 0, 0 };
+		region.imageExtent = { (uint32_t)width, (uint32_t)height, 1 };
+
+		// Copiar imagen al buffer de staging
+		vkCmdCopyImageToBuffer(m_copyCmdBuf, tex->m_image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			stagingBuffer.m_buffer, 1, &region);
+
+		// Enviar el comando de copia
+		SubmitCopyCommand();
 
 		// Transicionar la imagen de vuelta al layout original
 		TransitionImageLayout(tex->m_image, VK_FORMAT_R8G8B8A8_UNORM,
 			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-		// Mapear la memoria y copiar al buffer de destino
+		// Mapear la memoria del staging buffer y copiar al buffer de destino
 		void* pMappedMemory = nullptr;
-		VkResult res = vkMapMemory(m_device, stagingBuffer.m_mem, 0, layout.size, 0, &pMappedMemory);
+		VkResult res = vkMapMemory(m_device, stagingBuffer.m_mem, 0, imageSize, 0, &pMappedMemory);
 		if (res != VK_SUCCESS) {
 			printf("Error mapping memory: %d\n", res);
 			stagingBuffer.Destroy(m_device);
 			return 0;
 		}
 
-		memcpy(buffer, pMappedMemory, layout.size);
+		// Copiar datos al buffer proporcionado por el usuario
+		memcpy(buffer, pMappedMemory, imageSize);
 		vkUnmapMemory(m_device, stagingBuffer.m_mem);
 
 		// Limpiar el buffer de staging
 		stagingBuffer.Destroy(m_device);
 
-		return (size_t)layout.size;
+		return (size_t)imageSize;
 	}
 
 	// Método auxiliar para copiar imagen a buffer

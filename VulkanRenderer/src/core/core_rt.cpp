@@ -1453,5 +1453,92 @@ namespace core {
         }
         throw std::runtime_error("Failed to find suitable memory type!");
     }
+
+    size_t Raytracer::copyResultBytes(uint8_t* buffer, size_t bufferSize, VulkanTexture* tex, int width, int height) {
+        if (!tex || !tex->m_image || !buffer) {
+            return 0;
+        }
+
+        VkDevice device = *m_device;
+
+        // Calcular el tamaño de la imagen (RGBA8)
+        VkDeviceSize imageSize = width * height * 4;
+
+        // Verificar si el buffer es suficientemente grande
+        if (bufferSize < imageSize) {
+            printf("Buffer size insufficient. Required: %zu, Available: %zu\n",
+                (size_t)imageSize, bufferSize);
+            return 0;
+        }
+
+        // Crear command buffer temporal
+        VkCommandBuffer cmdBuf;
+        m_vkcore->CreateCommandBuffer(1, &cmdBuf);
+
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        vkBeginCommandBuffer(cmdBuf, &beginInfo);
+
+        // Crear staging buffer
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        createStagingBuffer(imageSize, stagingBuffer, stagingBufferMemory);
+
+        // Transición de layout para transferencia
+        // Nota: Ajusta el layout inicial según el estado actual de tu textura
+        // Podría ser VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL o VK_IMAGE_LAYOUT_GENERAL
+        m_vkcore->TransitionImageLayout((m_outTexture[0].m_image), VK_FORMAT_R8G8B8A8_UNORM,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
+        // Copiar imagen a buffer
+        VkBufferImageCopy region{};
+        region.bufferOffset = 0;
+        region.bufferRowLength = 0;
+        region.bufferImageHeight = 0;
+        region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        region.imageSubresource.mipLevel = 0;
+        region.imageSubresource.baseArrayLayer = 0;
+        region.imageSubresource.layerCount = 1;
+        region.imageOffset = { 0, 0, 0 };
+        region.imageExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1 };
+
+        vkCmdCopyImageToBuffer(cmdBuf, (m_outTexture[0].m_image), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            stagingBuffer, 1, &region);
+
+        // Restaurar layout original
+        m_vkcore->TransitionImageLayout((m_outTexture[0].m_image), VK_FORMAT_R8G8B8A8_UNORM,
+            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+        vkEndCommandBuffer(cmdBuf);
+
+        // Submit y esperar
+        VulkanQueue* pQueue = m_vkcore->GetQueue();
+        pQueue->SubmitSync(cmdBuf);
+        pQueue->WaitIdle();
+
+        // Mapear memoria y copiar datos al buffer del usuario
+        void* data;
+        VkResult res = vkMapMemory(device, stagingBufferMemory, 0, imageSize, 0, &data);
+        if (res != VK_SUCCESS) {
+            printf("Error mapping memory: %d\n", res);
+            // Limpiar recursos antes de retornar
+            vkDestroyBuffer(device, stagingBuffer, nullptr);
+            vkFreeMemory(device, stagingBufferMemory, nullptr);
+            vkFreeCommandBuffers(device, m_cmdBufPool, 1, &cmdBuf);
+            return 0;
+        }
+
+        // Copiar datos al buffer proporcionado por el usuario
+        memcpy(buffer, data, imageSize);
+
+        // Limpiar recursos
+        vkUnmapMemory(device, stagingBufferMemory);
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
+        vkFreeCommandBuffers(device, m_cmdBufPool, 1, &cmdBuf);
+
+        return (size_t)imageSize;
+    }
 #pragma endregion
 }

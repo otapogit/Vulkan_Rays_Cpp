@@ -120,7 +120,7 @@ namespace core {
 
 		void createGeometryDescriptorSet(int maxsize = 10);
 		void updateGeometryDescriptorSet(const std::vector<core::SimpleMesh>& meshes);
-
+		size_t copyResultBytes(uint8_t* buffer, size_t bufferSize, VulkanTexture* tex, int width, int height);
 
 	private:
 

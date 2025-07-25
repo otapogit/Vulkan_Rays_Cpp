@@ -84,6 +84,7 @@ class VulkanRenderer::Impl {
      bool init()  {
         //Esto primero tiene que irse
         //m_pWindow = core::glwf_vulkan_init(1080, 1080, "AppName");
+        glewInit();
         m_vkcore.Init("AppName", 1920,1080);
 
         m_device = m_vkcore.GetDevice();
@@ -329,7 +330,7 @@ instances in the scene)
      * @return the number of bytes written to buffer
      */
      size_t copyResultBytes(uint8_t* buffer, size_t bufferSize) {
-        return m_vkcore.copyResultBytes(buffer, bufferSize, m_outTexture, windowwidth, windowheight);
+        return m_raytracer.copyResultBytes(buffer, bufferSize, m_outTexture, windowwidth, windowheight);
     }
 
     /*
@@ -339,11 +340,15 @@ instances in the scene)
      */
      uint32_t getResultTextureId() {
         //Mirar el interop
-         
-         if (!m_outTexture || !m_outTexture->m_mem) {
+         if (!m_pWindow) {
+             std::cerr << "Error: No hay ventana GLFW disponible" << std::endl;
              return 0;
          }
 
+
+         if (!m_outTexture || !m_outTexture->m_mem) {
+             return 0;
+         }
 
         // 
          try {
@@ -403,10 +408,13 @@ instances in the scene)
              GLuint memoryObject;
              glCreateMemoryObjectsEXT(1, &memoryObject);
              checkGLError("glCreateMemoryObjectsEXT");
+             std::cout << "memoryObject = " << memoryObject << std::endl;
              glImportMemoryWin32HandleEXT(memoryObject, memReqs.size, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, memoryHandle);
              checkGLError("glImportMemoryWin32HandleEXT");
-             GLint dedicated = GL_TRUE;
-             glMemoryObjectParameterivEXT(memoryObject, GL_DEDICATED_MEMORY_OBJECT_EXT, &dedicated);
+             std::cout << "memoryObject = " << memoryObject << std::endl;
+             //GLint dedicated = GL_TRUE;
+             //glMemoryObjectParameterivEXT(memoryObject, GL_DEDICATED_MEMORY_OBJECT_EXT, &dedicated);
+             //checkGLError("glMemoryObjectParameterivEXT");
             #else
              // Linux - exportar file descriptor
              VkMemoryGetFdInfoKHR fdInfo = {};
@@ -429,14 +437,51 @@ instances in the scene)
              glImportMemoryFdEXT(memoryObject, memReqs.size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, memoryFd);
             #endif
 
-             glfwMakeContextCurrent(m_pWindow);
+             
              // Crear textura OpenGL
              GLuint texture = 0;
-             glGenTextures(1, &texture);
+             //glGenTextures(1, &texture);
+             //glBindTexture(GL_TEXTURE_2D, texture);
+             //checkGLError("glBindTexture");
+
+             glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+
+             PFNGLTEXSTORAGEMEM2DEXTPROC glTexStorageMem2DEXT =
+                 (PFNGLTEXSTORAGEMEM2DEXTPROC)wglGetProcAddress("glTexStorageMem2DEXT");
+
+             printf("Window width: %d, Window height: %d\n", windowwidth, windowheight);
+
+             /*if (glTexStorageMem2DEXT) {
+                 glGetError();
+                 /////ESTA MALVADA LINEA DE AQUI NO FUNCIONA POR ALGUNA RAZON QUE SE ESCAPA A MI ENTENDIMIENTO.
+                 glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, GL_RGBA8,
+                     windowwidth, windowheight, memoryObject, 0);
+                 GLenum err = glGetError();
+                 if (err != GL_NO_ERROR) {
+                     std::cerr << "Error en glTexStorageMem2DEXT: " << err << std::endl;
+                 }
+                 checkGLError("glTexStorageMem2DEXT");
+                 printf("Usado glTexStorageMem2DEXT\n");
+             }
+             else {*/
+                 // Fallback para DSA
+                 glTextureStorageMem2DEXT(texture, 1, GL_RGBA8,
+                     windowwidth, windowheight, memoryObject, 0);
+                 checkGLError("glTextureStorageMem2DEXT");
+                 printf("Usado glTextureStorageMem2DEXT\n");
+             //}
+
              glBindTexture(GL_TEXTURE_2D, texture);
-             checkGLError("glCreateTextures");
-             glTextureStorageMem2DEXT(texture, 1, GL_RGBA8, windowwidth, windowheight, memoryObject, 0);
-             checkGLError("glTextureStorageMem2DEXT");
+
+             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+             std::cout << "textureID: " << texture << std::endl;
+             std::cout << "glGetString(Version): " << glGetString(GL_VERSION) << std::endl;
+
+
 
              return (uint32_t)texture;
          }
