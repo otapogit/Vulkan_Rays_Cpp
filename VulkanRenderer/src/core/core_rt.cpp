@@ -149,7 +149,7 @@ namespace core {
   
         input.asGeometry.emplace_back(asGeom);
         input.asBuildOffsetInfo.emplace_back(offset);
-
+        
         printf("BLAS created for %d triangles\n", maxPrimitiveCount);
 
         return input;
@@ -158,6 +158,8 @@ namespace core {
     // También necesitarás actualizar tu método createBottomLevelAS:
     void Raytracer::createBottomLevelAS(std::vector<core::SimpleMesh> meshes) {
         // BLAS - Storing each primitive in a geometry
+        m_blas.clear();
+        allBlas.clear();
         allBlas.reserve(meshes.size());
 
         printf("\n");
@@ -168,7 +170,7 @@ namespace core {
             allBlas.emplace_back(blas);
         }
 
-
+        printf("size of allblas: %d\n", allBlas.size());
         // Ahora puedes llamar a tu implementación
         buildBlas(allBlas, VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR);
     }
@@ -200,7 +202,7 @@ namespace core {
 
         // Obtener la dirección del device del buffer de scratch
         VkDeviceAddress scratchAddress = GetBufferDeviceAddress(*m_device, blasScratchBuffer.m_buffer);
-
+        m_blas.clear();
         // 3. Crear y construir cada BLAS
         m_blas.resize(nbBlas);
 
@@ -237,7 +239,7 @@ namespace core {
             addressInfo.accelerationStructure = accelerationStructure;
             blas.address = vkGetAccelerationStructureDeviceAddressKHR(*m_device, &addressInfo);
 
-            m_blas.push_back(blas);
+            m_blas[idx] = blas;
 
             // 4. Construir la acceleration structure
             VkCommandBufferAllocateInfo allocInfo = {};
@@ -296,6 +298,8 @@ namespace core {
             vkFreeCommandBuffers(*m_device, m_cmdBufPool, 1, &commandBuffer);
         }
 
+        printf("Tamaño m_blas: %d", m_blas.size());
+
         // 5. Limpiar buffer de scratch
         vkDestroyBuffer(*m_device, blasScratchBuffer.m_buffer, NULL);
 
@@ -316,10 +320,12 @@ namespace core {
     {
         std::vector<VkAccelerationStructureInstanceKHR> instances;
 
+        printf("\n=== DEBUG TLAS CREATION ===\n");
+        printf("Number of BLAS: %zu\n", m_blas.size());
         // Crear instancia para cada BLAS
         for (size_t i = 0; i < m_blas.size(); i++) {
             VkAccelerationStructureInstanceKHR instance{};
-
+            memset(&instance, 0, sizeof(VkAccelerationStructureInstanceKHR));
             instance.transform = toTransformMatrixKHR(glm::mat4(1.0f));// Matriz de transformación (identidad por defecto)
             instance.instanceCustomIndex = static_cast<uint32_t>(i);// Índice personalizado de la instancia (accessible en shaders como gl_InstanceCustomIndexEXT)
             instance.accelerationStructureReference = m_blas[i].address;// Referencia a la BLAS
@@ -327,6 +333,13 @@ namespace core {
             instance.mask = 0xFF;// Máscara para ray culling (0xFF significa que todos los rays pueden intersectar)
             instance.instanceShaderBindingTableRecordOffset = 0; // Offset en la shader binding table para hit shaders
             instances.push_back(instance);
+
+            printf("Instance %zu:\n", i);
+            printf("  instanceCustomIndex = %u\n", instance.instanceCustomIndex);
+            printf("  accelerationStructureReference = 0x%llx\n", instance.accelerationStructureReference);
+            printf("  mask = 0x%02x\n", instance.mask);
+            printf("  flags = 0x%08x\n", instance.flags);
+            printf("\n");
         }
         printf("\n%zd instances pre build\n", instances.size());
 
@@ -993,7 +1006,7 @@ namespace core {
         textureWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         textureWrite.descriptorCount = static_cast<uint32_t>(imageInfos.size());
         textureWrite.pImageInfo = imageInfos.data();
-        descriptorWrites.push_back(textureWrite);
+        //descriptorWrites.push_back(textureWrite);
 
         vkUpdateDescriptorSets(*m_device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }

@@ -446,7 +446,7 @@ namespace core {
 		VkResult res = vkAllocateCommandBuffers(m_device, &cmdBufAllocInfo, cmdBufs);
 		CHECK_VK_RESULT(res, "vkAllocateCommandBuffers\n");
 
-		printf("%d command buffers created\n", count);
+		//printf("%d command buffers created\n", count);
 	}
 	
 	void VulkanCore::FreeCommandBuffers(uint32_t count, const VkCommandBuffer* pCmdBufs) {

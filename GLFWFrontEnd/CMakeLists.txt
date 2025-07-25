@@ -9,6 +9,9 @@ FetchContent_MakeAvailable(glfw)
 
 add_executable(GLFWFrontEnd src/main.cpp)
 
+file (GLOB SOURCES "src/*.cpp" "include/*.h")
+target_sources(GLFWFrontEnd PRIVATE ${SOURCES})
+
 target_include_directories(GLFWFrontEnd 
 	PRIVATE include 
 	#PRIVATE ${pgupv_SOURCE_DIR}/PGUPV/include
@@ -24,11 +27,6 @@ FetchContent_Declare(
 # Hacer disponible PGUPV
 FetchContent_MakeAvailable(pgupv)
 
-#find_library(PGUPV_LIB
-#    NAMES PGUPVd PGUPV pgupvd pgupv
-#    PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../_deps/PGUPV/
-#    NO_DEFAULT_PATH
-#)
 
     
 

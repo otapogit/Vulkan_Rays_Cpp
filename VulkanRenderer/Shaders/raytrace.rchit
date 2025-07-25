@@ -28,7 +28,7 @@ hitAttributeEXT vec3 attribs;
 
 void main() {
 
-    /*uint meshIndex = gl_InstanceID;
+    uint meshIndex = gl_InstanceCustomIndexEXT;
     uint primitiveIndex = gl_PrimitiveID;
     
     // Obtener los índices del triángulo
@@ -37,13 +37,39 @@ void main() {
     uint i2 = indexBuffers[meshIndex].indices[primitiveIndex * 3 + 2];
     
     // Obtener los vértices del triángulo
-    Vertex v0 = vertexBuffers[meshIndex].vertices[i0];
-    Vertex v1 = vertexBuffers[meshIndex].vertices[i1];
-    Vertex v2 = vertexBuffers[meshIndex].vertices[i2];*/
+    vec3 v0 = vertexBuffers[meshIndex].vertices[i0];
+    vec3 v1 = vertexBuffers[meshIndex].vertices[i1];
+    vec3 v2 = vertexBuffers[meshIndex].vertices[i2];
+
+    vec3 n0 = normalBuffers[meshIndex].normals[i0];
+    vec3 n1 = normalBuffers[meshIndex].normals[i1];
+    vec3 n2 = normalBuffers[meshIndex].normals[i2];
+
+    //No se están subiendo bien los atributos
+    //Lo que no va bien es las instanceID
 
     // Coordenadas barycéntricas del hit    
     const vec3 barycentricCoords = vec3(1.0f - attribs.x - attribs.y, attribs.x, attribs.y);
     
-    // Color basado en coordenadas barycéntricas (para visualización)
-    hitValue = barycentricCoords;
+
+    vec3 interpolatedNormal = normalize(
+        n0 * barycentricCoords.x + 
+        n1 * barycentricCoords.y + 
+        n2 * barycentricCoords.z
+    );
+    
+    // Interpolar la posición del hit
+    vec3 hitPosition = 
+        v0 * barycentricCoords.x + 
+        v1 * barycentricCoords.y + 
+        v2 * barycentricCoords.z;
+
+        /*
+    hitValue = vec3(
+        float((meshIndex + 1) % 2), 
+        float((meshIndex + 1) / 2 % 2), 
+        float((meshIndex + 1) / 4 % 2)
+    );*/
+
+    hitValue = abs(interpolatedNormal);
 }

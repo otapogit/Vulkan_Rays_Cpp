@@ -162,10 +162,10 @@ void renderTexturedQuad(GLuint textureID) {
         return;
     }
 
-    std::cout << "textureID valid? " << glIsTexture(textureID) << std::endl;
+    //std::cout << "textureID valid? " << glIsTexture(textureID) << std::endl;
     GLint boundTex = 0;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &boundTex);
-    std::cout << "GL_TEXTURE_BINDING_2D: " << boundTex << std::endl;
+    //std::cout << "GL_TEXTURE_BINDING_2D: " << boundTex << std::endl;
 
     // Activar textura
     glEnable(GL_TEXTURE_2D);
@@ -267,13 +267,13 @@ int main(int argc, char* argv[]) {
     // Activar v-sync
     glfwSwapInterval(1);
 
-    CreateCamera(glm::vec3(0.f, 0.f, 5.f));
-    CameraGLFWController::setupCallbacks(window, &camera);
+    CreateCamera(glm::vec3(1.f, 5.f, 1.f));
+    CameraGLFWController::setupCallbacks(window, m_pCamera);
 
     m_Renderer.init();
     initRT();
     m_Renderer.setOutputResolution(m_windowwidth, m_windowheight);
-    m_Renderer.save(true, window);
+    m_Renderer.save(false, window);
     m_Renderer.render();
 
     glfwMakeContextCurrent(window);
@@ -310,12 +310,22 @@ int main(int argc, char* argv[]) {
 
     // Configurar OpenGL
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Fondo negro
-    //glEnable(GL_TEXTURE_2D);
 
     std::cout << "Aplicación iniciada. Presiona ESC para salir." << std::endl;
 
+    glm::mat4 prevmat = m_pCamera->GetVPMatrix();
+
+    float lasttime = 0.0f;
+
     // Bucle principal
     while (!glfwWindowShouldClose(window)) {
+
+        float currentFrame = static_cast<float>(glfwGetTime());
+        float deltaTime = currentFrame - lasttime;
+        lasttime = currentFrame;
+
+        m_pCamera->Update(deltaTime);
+
         // Procesar eventos
         glfwPollEvents();
 
@@ -326,19 +336,26 @@ int main(int argc, char* argv[]) {
 
         // Limpiar pantalla
         glClear(GL_COLOR_BUFFER_BIT);
-        printf("Cleared screen\n");
+        //printf("Cleared screen\n");
 
         // Dibujar el cuadrado con textura
         renderTexturedQuad(textureID);
-        printf("Rendered quad\n");
+        //printf("Rendered quad\n");
+        m_Renderer.setCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
+        m_Renderer.copyResultBytes(imageBuffer, bufferSize);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_windowwidth, m_windowheight, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer);
+        checkGLError("glTexSubImage2D");
+
+        //Rerenderizar vulkan
+        m_Renderer.render();
 
         // Intercambiar buffers
         glfwSwapBuffers(window);
     }
     delete[] imageBuffer;
+
     // Limpiar recursos
-    //glDeleteTextures(1, &texture);
-    //glDeleteTextures(1, &textureID2);
     glDeleteTextures(1, &textureID);
     glfwTerminate();
 
