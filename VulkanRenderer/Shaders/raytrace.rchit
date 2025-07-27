@@ -84,6 +84,7 @@ void main() {
     );*/
 
     vec3 baseColor;
+    /*
     if (rayPayload.depth == 0) {
         //int l = textureIndexBuffers.textureIndex[meshIndex];
         baseColor = colorBuffer.colors[meshIndex]; // Rojo - primer impacto
@@ -98,7 +99,9 @@ void main() {
         baseColor = vec3(1.0, 0.0, 1.0); // Magenta - cuarto rebote
     } else {
         baseColor = vec3(0.0, 1.0, 1.0); // Cian - quinto rebote o más
-    }
+    }*/
+
+    baseColor = colorBuffer.colors[meshIndex]; // Rojo - primer impacto
 
     const int MAX_DEPTH = 2;
 
@@ -138,15 +141,17 @@ void main() {
         if (reflectionRayPayload.hit) {
             // Mezclar el color base con el color de la reflexión
             rayPayload.color = reflectionRayPayload.color;
-            
+            rayPayload.hit = reflectionRayPayload.hit;
         } else {
             // No hay más reflexiones, usar solo el color base
             rayPayload.color = baseColor;
+            rayPayload.hit = reflectionRayPayload.hit;
         }
     } else {
         // Profundidad máxima alcanzada
         rayPayload.color = baseColor; 
+        rayPayload.hit = true;
     }
+    //rayPayload.color = baseColor; 
     
-    rayPayload.hit = true;
 }

@@ -919,8 +919,6 @@ namespace core {
             m_normalBuffers.push_back(mesh.m_normalbuffer);
             texindexes.push_back(mesh.texIndex);
             
-            printf("Mesh color: %d %d %d\n", mesh.color.r, mesh.color.g, mesh.color.b);
-            printf("Mesh texindex: %d\n", mesh.texIndex);
 
         }
 
@@ -929,7 +927,9 @@ namespace core {
             printf("Colors was empty\n");
         }
         else {
-            printf("Size of colors: %d\n", colors.size());
+            for (glm::vec3 waht : colors) {
+                printf("Color: %d %d %d \n", waht.r, waht.g, waht.b);
+            }
         }
 
         m_textureIndexBuffer = m_vkcore->CreateBufferBlas(sizeof(int) * texindexes.size(), 
@@ -939,7 +939,7 @@ namespace core {
         // Mapear y escribir el texture index
         void* data;
         vkMapMemory(*m_device, m_textureIndexBuffer.m_mem, 0, sizeof(int) * texindexes.size(), 0, &data);
-        memcpy(data, &texindexes, sizeof(int)*texindexes.size());
+        memcpy(data, texindexes.data(), sizeof(int) * texindexes.size());
         vkUnmapMemory(*m_device, m_textureIndexBuffer.m_mem);
 
 
@@ -950,7 +950,7 @@ namespace core {
         // Mapear y escribir el color
         void* colorData;
         vkMapMemory(*m_device, m_colorBuffer.m_mem, 0, sizeof(glm::vec3) * colors.size(), 0, &colorData);
-        memcpy(colorData, &colors, sizeof(glm::vec3) * colors.size());
+        memcpy(colorData, colors.data(), sizeof(glm::vec3) * colors.size());
         vkUnmapMemory(*m_device, m_colorBuffer.m_mem);
 
     }
@@ -1006,9 +1006,9 @@ namespace core {
 
         // Texture index buffers
         VkDescriptorBufferInfo c_bufferInfo{};
-        bufferInfo.buffer = m_colorBuffer.m_buffer;
-        bufferInfo.offset = 0;
-        bufferInfo.range = VK_WHOLE_SIZE;
+        c_bufferInfo.buffer = m_colorBuffer.m_buffer;
+        c_bufferInfo.offset = 0;
+        c_bufferInfo.range = VK_WHOLE_SIZE;
         colorBufferInfos.push_back(c_bufferInfo);
         
 
@@ -1123,6 +1123,11 @@ namespace core {
         if (meshes.size() > m_maxsize) {
             printf("\nMax size of meshes exceeded, stopping program\nFor more info consult Renderer initRT: method createGeometryDescriptorSet\nCurrent maximum size is %d\n", m_maxsize);
             exit(1);
+        }
+
+        colors.clear();
+        for (const core::SimpleMesh& mesh : meshes) {
+            colors.push_back(glm::vec3(mesh.color.r, mesh.color.g, mesh.color.b));
         }
 
         CreateGeometryBuffers(meshes);
