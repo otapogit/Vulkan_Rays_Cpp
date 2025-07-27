@@ -578,7 +578,7 @@ namespace core {
         AccStructureLayoutBinding_Uniform.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
         AccStructureLayoutBinding_Uniform.descriptorCount = 1;
         //Obviamente si es necesario ampliar esto
-        AccStructureLayoutBinding_Uniform.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        AccStructureLayoutBinding_Uniform.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
 
 
         LayoutBindings.push_back(AccStructureLayoutBinding_Uniform);
@@ -1329,7 +1329,7 @@ namespace core {
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        vkBeginCommandBuffer(cmdBuf, &beginInfo);
+        vkBeginCommandBuffer(cmdBuf, &beginInfo);   
 
         // Ejecutar ray tracing
         raytrace(cmdBuf, width, height);
