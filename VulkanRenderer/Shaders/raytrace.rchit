@@ -76,6 +76,11 @@ void main() {
         v1 * barycentricCoords.y + 
         v2 * barycentricCoords.z;
 
+
+    if(textureIndexBuffers.textureIndex[meshIndex] >=0){
+        rayPayload.color = colorBuffer.colors[meshIndex];
+        rayPayload.hit = true;
+    }
     /*
     hitValue = vec3(
         float((meshIndex + 1) % 2), 
