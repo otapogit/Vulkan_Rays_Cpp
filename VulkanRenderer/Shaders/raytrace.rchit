@@ -85,9 +85,9 @@ void main() {
 
     vec3 baseColor;
     if (rayPayload.depth == 0) {
-        int l = textureIndexBuffers.textureIndex[meshIndex];
-        //baseColor = colorBuffer.colors[meshIndex]; // Rojo - primer impacto
-        baseColor = vec3(l/7.0,0.0,0.0);
+        //int l = textureIndexBuffers.textureIndex[meshIndex];
+        baseColor = colorBuffer.colors[meshIndex]; // Rojo - primer impacto
+        //baseColor = vec3(l/7.0,0.0,0.0);
     } else if (rayPayload.depth == 1) {
         baseColor = vec3(0.0, 1.0, 0.0); // Verde - primer rebote
     } else if (rayPayload.depth == 2) {

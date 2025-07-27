@@ -162,16 +162,23 @@ namespace core {
         allBlas.clear();
         allBlas.reserve(meshes.size());
 
+        colors.clear();
+
         printf("\n");
 
         for (const core::SimpleMesh& obj : meshes) {
             //Da error aqui
             auto blas = objectToVkGeometryKHR(obj);
             allBlas.emplace_back(blas);
+            colors.push_back(glm::vec3(obj.color.r,obj.color.g,obj.color.g));
             printf("color en createBLAS: %f %f %f\n", obj.color.r, obj.color.g, obj.color.b);
         }
 
         //printf("size of allblas: %d\n", allBlas.size());
+       
+        printf("Colors size: %d\n", colors.size());
+
+        // 
         // Ahora puedes llamar a tu implementación
         buildBlas(allBlas, VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR);
     }
@@ -900,11 +907,10 @@ namespace core {
         m_vertexBuffers.clear();
         m_indexBuffers.clear();
         m_normalBuffers.clear();
-        m_textureIndexBuffer = {};
-        m_colorBuffer = {};
+
 
         std::vector<int> texindexes = {};
-        std::vector<glm::vec3> colors = {};
+        
 
 
         for (const core::SimpleMesh& mesh : meshes) {
@@ -912,18 +918,18 @@ namespace core {
             m_indexBuffers.push_back(mesh.m_indexbuffer);
             m_normalBuffers.push_back(mesh.m_normalbuffer);
             texindexes.push_back(mesh.texIndex);
-            colors.push_back(mesh.color);
+            
             printf("Mesh color: %d %d %d\n", mesh.color.r, mesh.color.g, mesh.color.b);
             printf("Mesh texindex: %d\n", mesh.texIndex);
 
         }
 
 
-        if (!colors.empty()) {
+        if (colors.empty()) {
             printf("Colors was empty\n");
         }
         else {
-            printf("Size of colors: %d", colors.size());
+            printf("Size of colors: %d\n", colors.size());
         }
 
         m_textureIndexBuffer = m_vkcore->CreateBufferBlas(sizeof(int) * texindexes.size(), 
@@ -1113,7 +1119,7 @@ namespace core {
         printf("");
     }
 
-    void Raytracer::updateGeometryDescriptorSet(const std::vector<core::SimpleMesh>& meshes) {
+    void Raytracer::updateGeometryDescriptorSet(std::vector<core::SimpleMesh> meshes) {
         if (meshes.size() > m_maxsize) {
             printf("\nMax size of meshes exceeded, stopping program\nFor more info consult Renderer initRT: method createGeometryDescriptorSet\nCurrent maximum size is %d\n", m_maxsize);
             exit(1);

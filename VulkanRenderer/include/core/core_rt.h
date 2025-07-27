@@ -119,7 +119,7 @@ namespace core {
 		void UpdateAccStructure();
 
 		void createGeometryDescriptorSet(int maxsize = 10);
-		void updateGeometryDescriptorSet(const std::vector<core::SimpleMesh>& meshes);
+		void updateGeometryDescriptorSet(std::vector<core::SimpleMesh> meshes);
 		size_t copyResultBytes(uint8_t* buffer, size_t bufferSize, VulkanTexture* tex, int width, int height);
 
 	private:
@@ -222,6 +222,8 @@ namespace core {
 		std::vector<VulkanTexture*> m_textures;
 
 		int m_maxsize = 10;
+
+		std::vector<glm::vec3> colors = {};
 
 		VkPipeline m_rtPipeline = VK_NULL_HANDLE;
 		VkPipelineLayout m_rtPipelineLayout = VK_NULL_HANDLE;
