@@ -148,7 +148,7 @@ namespace core {
 		void CreateGeometryDescriptorSetLayout(int maxsize);
 		void AllocateGeometryDescriptorSet();
 		// Ya los tengo
-		void CreateGeometryBuffers(const std::vector<core::SimpleMesh>& meshes);
+		void CreateGeometryBuffers(std::vector<core::SimpleMesh> meshes);
 		void WriteGeometryDescriptorSet();
 		void CleanupGeometryDescriptorSet();
 		
@@ -217,7 +217,8 @@ namespace core {
 		std::vector<BufferMemory> m_vertexBuffers;
 		std::vector<BufferMemory> m_indexBuffers;
 		std::vector<BufferMemory> m_normalBuffers;
-		std::vector<BufferMemory> m_textureIndexBuffers;
+		BufferMemory m_textureIndexBuffer;
+		BufferMemory m_colorBuffer;
 		std::vector<VulkanTexture*> m_textures;
 
 		int m_maxsize = 10;

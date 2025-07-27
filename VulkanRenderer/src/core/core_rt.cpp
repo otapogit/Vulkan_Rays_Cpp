@@ -168,9 +168,10 @@ namespace core {
             //Da error aqui
             auto blas = objectToVkGeometryKHR(obj);
             allBlas.emplace_back(blas);
+            printf("color en createBLAS: %f %f %f\n", obj.color.r, obj.color.g, obj.color.b);
         }
 
-        printf("size of allblas: %d\n", allBlas.size());
+        //printf("size of allblas: %d\n", allBlas.size());
         // Ahora puedes llamar a tu implementación
         buildBlas(allBlas, VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR);
     }
@@ -776,15 +777,17 @@ namespace core {
     void Raytracer::createGeometryDescriptorSet( int maxsize) {
         m_maxsize = maxsize;
         CreateGeometryDescriptorPool(maxsize);
+        printf("Creating Geometry layout\n");
         CreateGeometryDescriptorSetLayout(maxsize);
+        printf("Allocating layout\n");
         AllocateGeometryDescriptorSet();
 
     }
     void Raytracer::CreateGeometryDescriptorPool(int numMeshes) {
         // Calculamos el número de descriptors necesarios
-        // Por cada mesh: vertex buffer + index buffer + normal buffer + texture index buffer + texture sampler
+        // Por cada mesh: vertex buffer + index buffer + normal buffer + texture index buffer + color + texture sampler
         std::vector<VkDescriptorPoolSize> poolSizes = {
-            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, static_cast<uint32_t>(numMeshes * 4)}, // vertex, index, normal, texture index
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, static_cast<uint32_t>(numMeshes * 5)}, // vertex, index, normal, texture index, color
             {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, static_cast<uint32_t>(numMeshes)} // texturas
         };
 
@@ -834,14 +837,22 @@ namespace core {
         VkDescriptorSetLayoutBinding textureIndexBinding{};
         textureIndexBinding.binding = 3;
         textureIndexBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        textureIndexBinding.descriptorCount = maxsize;
+        textureIndexBinding.descriptorCount = 1;
         textureIndexBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
         textureIndexBinding.pImmutableSamplers = nullptr;
         bindings.push_back(textureIndexBinding);
 
+        VkDescriptorSetLayoutBinding colorBinding{};
+        colorBinding.binding = 4;
+        colorBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        colorBinding.descriptorCount = 1;
+        colorBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        colorBinding.pImmutableSamplers = nullptr;
+        bindings.push_back(colorBinding);
+
         // Binding 4: Array de texturas
         VkDescriptorSetLayoutBinding textureBinding{};
-        textureBinding.binding = 4;
+        textureBinding.binding = 5;
         textureBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         textureBinding.descriptorCount = maxsize;
         textureBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
@@ -870,7 +881,7 @@ namespace core {
         }
     }
 
-    void Raytracer::CreateGeometryBuffers(const std::vector<core::SimpleMesh>& meshes) {
+    void Raytracer::CreateGeometryBuffers(std::vector<core::SimpleMesh> meshes) {
         // Limpiar buffers existentes
         for (auto& buffer : m_vertexBuffers) {
             buffer.Destroy(*m_device);
@@ -881,28 +892,68 @@ namespace core {
         for (auto& buffer : m_normalBuffers) {
             buffer.Destroy(*m_device);
         }
-        for (auto& buffer : m_textureIndexBuffers) {
-            buffer.Destroy(*m_device);
-        }
+        
+        m_textureIndexBuffer.Destroy(*m_device);
+        m_colorBuffer.Destroy(*m_device);
+
 
         m_vertexBuffers.clear();
         m_indexBuffers.clear();
         m_normalBuffers.clear();
-        m_textureIndexBuffers.clear();
+        m_textureIndexBuffer = {};
+        m_colorBuffer = {};
 
-        for (auto mesh : meshes) {
+        std::vector<int> texindexes = {};
+        std::vector<glm::vec3> colors = {};
+
+
+        for (const core::SimpleMesh& mesh : meshes) {
             m_vertexBuffers.push_back(mesh.m_vb);
             m_indexBuffers.push_back(mesh.m_indexbuffer);
             m_normalBuffers.push_back(mesh.m_normalbuffer);
-            
-            BufferMemory texBuffer;
-            texBuffer = m_vkcore->CreateBufferBlas(sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
-                                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-            m_textureIndexBuffers.push_back(texBuffer);
+            texindexes.push_back(mesh.texIndex);
+            colors.push_back(mesh.color);
+            printf("Mesh color: %d %d %d\n", mesh.color.r, mesh.color.g, mesh.color.b);
+            printf("Mesh texindex: %d\n", mesh.texIndex);
+
         }
+
+
+        if (!colors.empty()) {
+            printf("Colors was empty\n");
+        }
+        else {
+            printf("Size of colors: %d", colors.size());
+        }
+
+        m_textureIndexBuffer = m_vkcore->CreateBufferBlas(sizeof(int) * texindexes.size(), 
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+
+        // Mapear y escribir el texture index
+        void* data;
+        vkMapMemory(*m_device, m_textureIndexBuffer.m_mem, 0, sizeof(int) * texindexes.size(), 0, &data);
+        memcpy(data, &texindexes, sizeof(int)*texindexes.size());
+        vkUnmapMemory(*m_device, m_textureIndexBuffer.m_mem);
+
+
+        m_colorBuffer = m_vkcore->CreateBufferBlas(sizeof(glm::vec3) * colors.size(),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+        // Mapear y escribir el color
+        void* colorData;
+        vkMapMemory(*m_device, m_colorBuffer.m_mem, 0, sizeof(glm::vec3) * colors.size(), 0, &colorData);
+        memcpy(colorData, &colors, sizeof(glm::vec3) * colors.size());
+        vkUnmapMemory(*m_device, m_colorBuffer.m_mem);
+
     }
 
     void Raytracer::WriteGeometryDescriptorSet() {
+
+
+        printf("Writing Geometry descriptor set\n");
+
         std::vector<VkWriteDescriptorSet> descriptorWrites;
 
         // Preparar buffer infos para cada tipo de buffer
@@ -910,6 +961,7 @@ namespace core {
         std::vector<VkDescriptorBufferInfo> indexBufferInfos;
         std::vector<VkDescriptorBufferInfo> normalBufferInfos;
         std::vector<VkDescriptorBufferInfo> textureIndexBufferInfos;
+        std::vector<VkDescriptorBufferInfo> colorBufferInfos;
         std::vector<VkDescriptorImageInfo> imageInfos;
 
         // Vertex buffers
@@ -940,13 +992,19 @@ namespace core {
         }
 
         // Texture index buffers
-        for (const auto& buffer : m_textureIndexBuffers) {
-            VkDescriptorBufferInfo bufferInfo{};
-            bufferInfo.buffer = buffer.m_buffer;
-            bufferInfo.offset = 0;
-            bufferInfo.range = VK_WHOLE_SIZE;
-            textureIndexBufferInfos.push_back(bufferInfo);
-        }
+        VkDescriptorBufferInfo bufferInfo{};
+        bufferInfo.buffer = m_textureIndexBuffer.m_buffer;
+        bufferInfo.offset = 0;
+        bufferInfo.range = VK_WHOLE_SIZE;
+        textureIndexBufferInfos.push_back(bufferInfo);
+
+        // Texture index buffers
+        VkDescriptorBufferInfo c_bufferInfo{};
+        bufferInfo.buffer = m_colorBuffer.m_buffer;
+        bufferInfo.offset = 0;
+        bufferInfo.range = VK_WHOLE_SIZE;
+        colorBufferInfos.push_back(c_bufferInfo);
+        
 
         // Texture samplers
         for (const auto& texture : m_textures) {
@@ -998,10 +1056,20 @@ namespace core {
         textureIndexWrite.pBufferInfo = textureIndexBufferInfos.data();
         descriptorWrites.push_back(textureIndexWrite);
 
+        VkWriteDescriptorSet colorWrite{};
+        colorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        colorWrite.dstSet = m_geometryDescSet;
+        colorWrite.dstBinding = 4;
+        colorWrite.dstArrayElement = 0;
+        colorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        colorWrite.descriptorCount = static_cast<uint32_t>(colorBufferInfos.size());
+        colorWrite.pBufferInfo = colorBufferInfos.data();
+        descriptorWrites.push_back(colorWrite);
+
         VkWriteDescriptorSet textureWrite{};
         textureWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         textureWrite.dstSet = m_geometryDescSet;
-        textureWrite.dstBinding = 4;
+        textureWrite.dstBinding = 5;
         textureWrite.dstArrayElement = 0;
         textureWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         textureWrite.descriptorCount = static_cast<uint32_t>(imageInfos.size());
@@ -1030,7 +1098,8 @@ namespace core {
         m_vertexBuffers.clear();
         m_indexBuffers.clear();
         m_normalBuffers.clear();
-        m_textureIndexBuffers.clear();
+        m_textureIndexBuffer.Destroy(*m_device);
+        m_colorBuffer.Destroy(*m_device);
 
         // Limpiar descriptor set
         if (m_geometryDescSetLayout != VK_NULL_HANDLE) {

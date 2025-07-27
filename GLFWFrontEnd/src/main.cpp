@@ -487,11 +487,11 @@ void initRT(){
     uint32_t meshid = m_Renderer.defineMesh(vertData, normData, uvData, indices);
     printf("Mesh Defined\n");
 
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), meshid);
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), topMeshId);
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), bottomMeshId);
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), diagonalMeshId);
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), frontMeshId);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f,0.0f,0.0f), meshid);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(0.0f,1.0f,0.0f), topMeshId);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(0.0f,0.0f,1.0f), bottomMeshId);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f,1.0f,1.0f), diagonalMeshId);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f,1.0f,0.0f), frontMeshId);
     m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), rightMeshId);
     m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), leftMeshId);
 

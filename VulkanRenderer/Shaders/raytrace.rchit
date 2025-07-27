@@ -18,10 +18,14 @@ layout(set = 2, binding = 2) readonly buffer NormalBuffers {
 } normalBuffers[];
 
 layout(set = 2, binding = 3) readonly buffer TextureIndexBuffers {
-    uint textureIndex;
-} textureIndexBuffers[]; //Arrays de 1 numero
+    int textureIndex[];
+} textureIndexBuffers; //Arrays de 1 numero
 
-layout(set = 2, binding = 4) uniform sampler2D textures[];
+layout(set = 2, binding = 4) restrict readonly buffer ColorBuffer {
+    vec3 colors[];
+} colorBuffer;
+
+layout(set = 2, binding = 5) uniform sampler2D textures[];
 
 struct RayPayload {
     vec3 color;
@@ -81,7 +85,9 @@ void main() {
 
     vec3 baseColor;
     if (rayPayload.depth == 0) {
-        baseColor = vec3(1.0, 0.0, 0.0); // Rojo - primer impacto
+        int l = textureIndexBuffers.textureIndex[meshIndex];
+        //baseColor = colorBuffer.colors[meshIndex]; // Rojo - primer impacto
+        baseColor = vec3(l/7.0,0.0,0.0);
     } else if (rayPayload.depth == 1) {
         baseColor = vec3(0.0, 1.0, 0.0); // Verde - primer rebote
     } else if (rayPayload.depth == 2) {

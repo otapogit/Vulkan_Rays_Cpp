@@ -25,12 +25,12 @@ namespace core{
 		glm::mat4 m_transMat = glm::mat4(1.0f);
 
 		//colorbuffer?
-		glm::vec3 color = glm::vec3(0.f);
+		glm::vec3 color;
 
 		VkIndexType m_indexType = VK_INDEX_TYPE_UINT32;
 		int vertexcount = 0;
 		VulkanTexture* m_pTex = NULL;
-		uint32_t texIndex = 0;
+		int texIndex = -1;
 
 		void Destroy(VkDevice device) {
 			m_vb.Destroy(device);

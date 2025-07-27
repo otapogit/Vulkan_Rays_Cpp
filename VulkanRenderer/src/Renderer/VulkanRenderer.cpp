@@ -187,7 +187,7 @@ the scene with Renderer::addMesh
 
         meshesC[tid].m_transMat = modelMatrix;
 
-        meshesC[tid].color = color;
+        meshesC[tid].color = glm::vec3(color);
 
         std::vector<glm::vec3> modelverts = {};
         std::vector<glm::vec3> modelnorms = {};
@@ -218,8 +218,10 @@ the scene with Renderer::addMesh
         meshesC[tid].m_vb = m_vkcore.CreateVertexBuffer(modelverts.data(), meshesC[tid].m_vertexBufferSize, true);
         meshesC[tid].m_normalbuffer = m_vkcore.CreateNormalBuffer(modelnorms, true);
      
+        printf("Asignando color: %f %f %f\n", color.r, color.g, color.b);
         //m_meshesDraw contiene las meshes que se dibujarán
         m_meshesDraw.push_back(meshesC[tid]);
+        printf("Color copiado: %f %f %f\n", m_meshesDraw.back().color.r, m_meshesDraw.back().color.g, m_meshesDraw.back().color.b);
 
         return true;
 
@@ -251,8 +253,19 @@ the scene with Renderer::addMesh
      bool addLight(const glm::mat4& modelMatrix, MeshId id,
         const glm::vec3& color, LightId lid, TextureId tid = 0) {
         //pasarle la textura la id y tal
+         int mid;
+         for (int i = 0; i < meshesC.size(); i++) {
+             if (meshesC[i].id == id) {
+                 mid = id;
+                 break;
+             }
+         }
+         if (mid == -1) return false;
+         meshesC[mid].texIndex = tid;
 
         return addMesh(modelMatrix, color, id);
+
+
     }
 
     /**
