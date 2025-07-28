@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <iostream>
 
+#include "OBJloader.cpp"
+
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
 #include <GLFW/glfw3native.h>  // Importante: debes incluir esto

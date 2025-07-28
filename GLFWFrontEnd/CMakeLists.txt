@@ -7,6 +7,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
+# Assimp 
+FetchContent_Declare(
+    assimp
+    GIT_REPOSITORY https://github.com/assimp/assimp.git
+    GIT_TAG        v5.3.1  # o la versión que prefieras
+)
+FetchContent_MakeAvailable(assimp)
+
 add_executable(GLFWFrontEnd src/main.cpp)
 
 file (GLOB SOURCES "src/*.cpp" "include/*.h")
@@ -17,7 +25,7 @@ target_include_directories(GLFWFrontEnd
 	#PRIVATE ${pgupv_SOURCE_DIR}/PGUPV/include
 )
 
-# PGUPV - Descargar desde GitHub
+# PGUPV 
 FetchContent_Declare(
     pgupv
     GIT_REPOSITORY https://github.com/fjabad/pgupv.git
@@ -36,6 +44,7 @@ target_link_libraries(GLFWFrontEnd
     PRIVATE GLRenderer
     PRIVATE glfw
     PRIVATE PGUPV
+    PRIVATE assimp
 )
 
 

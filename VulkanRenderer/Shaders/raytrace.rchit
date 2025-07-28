@@ -76,11 +76,11 @@ void main() {
         v1 * barycentricCoords.y + 
         v2 * barycentricCoords.z;
 
-
+    /*
     if(textureIndexBuffers.textureIndex[meshIndex] >=0){
         rayPayload.color = colorBuffer.colors[meshIndex];
         rayPayload.hit = true;
-    }
+    }*/
     /*
     hitValue = vec3(
         float((meshIndex + 1) % 2), 
@@ -89,11 +89,11 @@ void main() {
     );*/
 
     vec3 baseColor;
-    /*
+    
     if (rayPayload.depth == 0) {
         //int l = textureIndexBuffers.textureIndex[meshIndex];
-        baseColor = colorBuffer.colors[meshIndex]; // Rojo - primer impacto
-        //baseColor = vec3(l/7.0,0.0,0.0);
+        //baseColor = colorBuffer.colors[meshIndex]; // Rojo - primer impacto
+        baseColor = vec3(1.0,0.0,0.0);
     } else if (rayPayload.depth == 1) {
         baseColor = vec3(0.0, 1.0, 0.0); // Verde - primer rebote
     } else if (rayPayload.depth == 2) {
@@ -104,9 +104,9 @@ void main() {
         baseColor = vec3(1.0, 0.0, 1.0); // Magenta - cuarto rebote
     } else {
         baseColor = vec3(0.0, 1.0, 1.0); // Cian - quinto rebote o más
-    }*/
+    }
 
-    baseColor = colorBuffer.colors[meshIndex]; // Rojo - primer impacto
+    //baseColor = colorBuffer.colors[meshIndex]; // Rojo - primer impacto
 
     const int MAX_DEPTH = 2;
 

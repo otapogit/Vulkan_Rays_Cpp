@@ -57,15 +57,16 @@ void CameraGLFWController::cursorPosCallback(GLFWwindow* window, double xpos, do
 
     glm::vec2 currentPos(static_cast<float>(xpos), static_cast<float>(ypos));
 
-    // Si el cursor está capturado o el botón derecho está presionado
     if (s_cursorCaptured || s_camera->m_mouseState.m_buttonPressed) {
         if (s_firstMouse) {
+            s_camera->m_oldMousePos = currentPos; // Importante: establecer la posición anterior
             s_camera->m_mouseState.m_pos = currentPos;
             s_firstMouse = false;
         }
-
-        // Actualizar posición del mouse en la cámara
-        s_camera->m_mouseState.m_pos = currentPos;
+        else {
+            s_camera->m_oldMousePos = s_camera->m_mouseState.m_pos; // Guardar posición anterior
+            s_camera->m_mouseState.m_pos = currentPos;
+        }
     }
 }
 
@@ -93,7 +94,7 @@ void CameraGLFWController::scrollCallback(GLFWwindow* window, double xoffset, do
 
     // Opcional: Ajustar velocidad de movimiento con scroll
     float speedChange = static_cast<float>(yoffset) * 0.5f;
-    s_camera->m_maxSpeed = std::max(1.0f, s_camera->m_maxSpeed + speedChange);
+    s_camera->m_maxSpeed = std::max(0.1f, s_camera->m_maxSpeed + speedChange);
 
     std::cout << "Velocidad de cámara: " << s_camera->m_maxSpeed << std::endl;
 }
