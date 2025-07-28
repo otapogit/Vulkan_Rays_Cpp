@@ -106,7 +106,7 @@ void main() {
         baseColor = vec3(0.0, 1.0, 1.0); // Cian - quinto rebote o más
     }
 
-    //baseColor = colorBuffer.colors[meshIndex]; // Rojo - primer impacto
+    baseColor = colorBuffer.colors[meshIndex]; // Rojo - primer impacto
 
     const int MAX_DEPTH = 2;
 

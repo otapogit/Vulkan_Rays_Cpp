@@ -157,6 +157,8 @@ the scene with Renderer::addMesh
 
         meshesC.push_back(mesh);
 
+        printf("Mesh created with id: %zd", mesh.id);
+
         return mesh.id;
     }
 
@@ -218,7 +220,7 @@ the scene with Renderer::addMesh
         meshesC[tid].m_vb = m_vkcore.CreateVertexBuffer(modelverts.data(), meshesC[tid].m_vertexBufferSize, true);
         meshesC[tid].m_normalbuffer = m_vkcore.CreateNormalBuffer(modelnorms, true);
      
-        printf("Asignando color: %f %f %f\n", color.r, color.g, color.b);
+        
         //m_meshesDraw contiene las meshes que se dibujarán
         m_meshesDraw.push_back(meshesC[tid]);
         printf("Color copiado: %f %f %f\n", m_meshesDraw.back().color.r, m_meshesDraw.back().color.g, m_meshesDraw.back().color.b);

@@ -41,9 +41,9 @@ public:
         }
 
         std::cout << "Archivo OBJ cargado exitosamente!" << std::endl;
-        std::cout << "Vértices: " << vertices.size() << std::endl;
+        std::cout << "Vertices: " << vertices.size() << std::endl;
         std::cout << "Normales: " << normals.size() << std::endl;
-        std::cout << "Índices: " << indices.size() << std::endl;
+        std::cout << "indices: " << indices.size() << std::endl;
 
         return true;
     }
@@ -143,10 +143,10 @@ public:
 
     // Método para imprimir estadísticas
     void printStats() const {
-        std::cout << "\n=== Estadísticas del modelo ===" << std::endl;
-        std::cout << "Número de vértices: " << vertices.size() << std::endl;
-        std::cout << "Número de normales: " << normals.size() << std::endl;
-        std::cout << "Número de índices: " << indices.size() << std::endl;
-        std::cout << "Número de triángulos: " << indices.size() / 3 << std::endl;
+        std::cout << "\n=== Estadisticas del modelo ===" << std::endl;
+        std::cout << "Numero de vertices: " << vertices.size() << std::endl;
+        std::cout << "Numero de normales: " << normals.size() << std::endl;
+        std::cout << "Numero de indices: " << indices.size() << std::endl;
+        std::cout << "Numero de triangulos: " << indices.size() / 3 << std::endl;
     }
 };

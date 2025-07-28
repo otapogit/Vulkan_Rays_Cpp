@@ -171,12 +171,12 @@ namespace core {
             auto blas = objectToVkGeometryKHR(obj);
             allBlas.emplace_back(blas);
             colors.push_back(glm::vec3(obj.color.r,obj.color.g,obj.color.g));
-            printf("color en createBLAS: %f %f %f\n", obj.color.r, obj.color.g, obj.color.b);
+            //printf("color en createBLAS: %f %f %f\n", obj.color.r, obj.color.g, obj.color.b);
         }
 
         //printf("size of allblas: %d\n", allBlas.size());
        
-        printf("Colors size: %d\n", colors.size());
+        //printf("Colors size: %d\n", colors.size());
 
         // 
         // Ahora puedes llamar a tu implementación
@@ -432,11 +432,13 @@ namespace core {
         createInfo.size = sizeInfo.accelerationStructureSize;
         createInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
 
+        printf("Creating AS\n");
+
         VkResult result = vkCreateAccelerationStructureKHR(*m_device, &createInfo, nullptr, &m_tlas.handle);
         if (result != VK_SUCCESS) {
             throw std::runtime_error("Failed to create top level acceleration structure");
         }
-
+        printf("Created AS\n");
         m_tlas.buffer = tlasBuffer;
 
         // 10. Obtener la dirección de la TLAS
@@ -464,8 +466,10 @@ namespace core {
         // Preparar punteros a la información de rangos
         VkAccelerationStructureBuildRangeInfoKHR* pBuildRangeInfo = &buildData.rangeInfo[0];
 
+        printf("Building TLAS\n");
         // Construir la acceleration structure
         vkCmdBuildAccelerationStructuresKHR(commandBuffer, 1, &buildData.buildInfo, &pBuildRangeInfo);
+        printf("Built TLAS\n");
 
         // Añadir barrier
         VkMemoryBarrier barrier{ VK_STRUCTURE_TYPE_MEMORY_BARRIER };
@@ -924,11 +928,11 @@ namespace core {
 
 
         if (colors.empty()) {
-            printf("Colors was empty\n");
+            //printf("Colors was empty\n");
         }
         else {
             for (glm::vec3 waht : colors) {
-                printf("Color: %d %d %d \n", waht.r, waht.g, waht.b);
+                //printf("Color: %d %d %d \n", waht.r, waht.g, waht.b);
             }
         }
 

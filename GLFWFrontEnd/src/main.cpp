@@ -58,6 +58,7 @@ static uint32_t createMesh(const std::vector<Vertex>& vertices, const std::vecto
 }
 
 void initRT();
+void initOBJ();
 void CreateCamera(glm::vec3 pos);
 void CreateCamera(glm::vec3 pos, float FOV, float znear, float zfar);
 
@@ -273,6 +274,7 @@ int main(int argc, char* argv[]) {
     CameraGLFWController::setupCallbacks(window, m_pCamera);
 
     m_Renderer.init();
+    //initOBJ();
     initRT();
     m_Renderer.setOutputResolution(m_windowwidth, m_windowheight);
     m_Renderer.save(false, window);
@@ -362,6 +364,35 @@ int main(int argc, char* argv[]) {
     glfwTerminate();
 
     return 0;
+}
+
+void initOBJ() {
+
+    OBJLoader loader;
+    // Cargar el archivo OBJ
+    if (loader.loadOBJ("../GLFWFrontEnd/OBJ/free_car_001.obj")) {
+
+        
+        // Obtener los datos
+        auto vertices = loader.getVertices();
+        auto normals = loader.getNormals();
+        auto indices = loader.getIndices();
+        std::vector<glm::vec2> uvs = {glm::vec2(1.0f)};
+
+        // Datos entrelazados (vértice + normal)
+        //auto interleavedData = loader.getInterleavedData();
+
+        uint32_t vanId = m_Renderer.defineMesh(vertices, normals, uvs, indices);
+        m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f, 0.f)), glm::vec3(1.0f), vanId);
+        // Mostrar estadísticas
+        loader.printStats();
+
+    }
+    else {
+        std::cerr << "Error al cargar el archivo OBJ" << std::endl;
+        exit(1);
+    }
+
 }
 
 void initRT(){

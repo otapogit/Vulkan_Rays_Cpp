@@ -745,7 +745,7 @@ namespace core {
 		// Step 1: create a buffer
 		VkResult res = vkCreateBuffer(m_device, &vbCreateInfo, NULL, &Buf.m_buffer);
 		CHECK_VK_RESULT(res, "vkCreateBuffer\n");
-		printf("Buffer created\n");
+		//printf("Buffer created\n");
 
 		// Step 2: get the buffer memory requirements
 		VkMemoryRequirements MemReqs = { 0 };
