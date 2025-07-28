@@ -25,9 +25,8 @@ public:
         // Cargar el archivo con post-procesamiento
         const aiScene* scene = importer.ReadFile(filepath,
             aiProcess_Triangulate |           // Convertir a triángulos
-            aiProcess_FlipUVs |              // Voltear coordenadas UV
-            aiProcess_GenNormals |           // Generar normales si no las tiene
-            aiProcess_CalcTangentSpace);     // Calcular tangentes
+            aiProcess_GenNormals          // Generar normales si no las tiene
+            );     // Calcular tangentes
 
         // Verificar que la carga fue exitosa
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {

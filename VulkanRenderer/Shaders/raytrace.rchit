@@ -106,11 +106,17 @@ void main() {
         baseColor = vec3(0.0, 1.0, 1.0); // Cian - quinto rebote o más
     }
 
-    baseColor = colorBuffer.colors[meshIndex]; // Rojo - primer impacto
+    
 
     const int MAX_DEPTH = 2;
 
     vec3 incomingDirection = gl_WorldRayDirectionEXT;
+    
+    //Shading básico para el color base
+    //baseColor = colorBuffer.colors[meshIndex]* ((dot(incomingDirection, interpolatedNormal)+1)/2); // Rojo - primer impacto
+    
+    
+    baseColor = colorBuffer.colors[meshIndex];
 
    // Si no hemos alcanzado la profundidad máxima, lanzar rayo de reflexión
     if (rayPayload.depth < MAX_DEPTH && dot(incomingDirection, interpolatedNormal) > 0.0) {
