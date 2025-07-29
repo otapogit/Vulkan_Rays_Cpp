@@ -274,8 +274,8 @@ int main(int argc, char* argv[]) {
     CameraGLFWController::setupCallbacks(window, m_pCamera);
 
     m_Renderer.init();
-    //initOBJ();
-    initRT();
+    initOBJ();
+   // initRT();
     m_Renderer.setOutputResolution(m_windowwidth, m_windowheight);
     m_Renderer.save(false, window);
     m_Renderer.render();
@@ -370,8 +370,8 @@ void initOBJ() {
 
     OBJLoader loader;
     // Cargar el archivo OBJ
-    if (loader.loadOBJ("../GLFWFrontEnd/OBJ/free_car_001.obj")) {
-
+    if (loader.loadOBJOptimized("../GLFWFrontEnd/OBJ/free_car_001.obj")) {
+        loader.analyzeVertexDuplication();
         
         // Obtener los datos
         auto vertices = loader.getVertices();
