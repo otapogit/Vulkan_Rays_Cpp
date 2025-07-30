@@ -60,77 +60,13 @@ namespace core {
         VkAccelerationStructureGeometryTrianglesDataKHR triangles{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR };
         triangles.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;  // vec3 vertex position data.
         triangles.vertexData.deviceAddress = vertexAddress;
-        triangles.vertexStride = sizeof(core::VertexObj);
+        triangles.vertexStride = sizeof(glm::vec3);
         // Describe index data (32-bit unsigned int)
         triangles.indexType = VK_INDEX_TYPE_UINT32;
         triangles.indexData.deviceAddress = indexAddress;
         // Indicate identity transform by setting transformData to null device pointer.
         triangles.transformData = {};
-        triangles.maxVertex = (uint32_t)(model.m_vertexBufferSize - 1);
-        /*if (model.m_transMat != glm::mat4(1.0f)) {
-            // Handle transformation matrix
-            VkDeviceAddress transformAddress = 0;
-            BufferMemory transformBuffer;
-            // Vulkan expects a 3x4 matrix(transpose of upper 3x4 of the 4x4 matrix)
-            // Format: [m00, m10, m20, m01, m11, m21, m02, m12, m22, m03, m13, m23]
-            float transformMatrix[12] = {
-                model.m_transMat[0][0], model.m_transMat[1][0], model.m_transMat[2][0], // First column
-                model.m_transMat[0][1], model.m_transMat[1][1], model.m_transMat[2][1], // Second column  
-                model.m_transMat[0][2], model.m_transMat[1][2], model.m_transMat[2][2], // Third column
-                model.m_transMat[0][3], model.m_transMat[1][3], model.m_transMat[2][3]  // Fourth column (translation)
-            };
-            
-            // Create buffer for transformation matrix
-            VkBufferUsageFlags usage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
-                VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-            VkMemoryPropertyFlags memProps = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-            transformBuffer = m_vkcore->CreateBufferACC(sizeof(transformMatrix), usage, memProps);
-            // Map and copy transform data
-            void* pMem = nullptr;
-            VkResult res = vkMapMemory(*m_device, transformBuffer.m_mem, 0, sizeof(transformMatrix), 0, &pMem);
-            CHECK_VK_RESULT(res, "vkMapMemory transform\n");
-            memcpy(pMem, transformMatrix, sizeof(transformMatrix));
-            vkUnmapMemory(*m_device, transformBuffer.m_mem);
-
-            // Step 1: Create staging buffer
-            VkBufferUsageFlags stagingUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-            VkMemoryPropertyFlags stagingMemProps = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-            BufferMemory stagingBuffer = m_vkcore->CreateBufferACC(sizeof(transformMatrix), stagingUsage, stagingMemProps);
-
-            // Step 2: Map the memory of the staging buffer
-            void* pMem = nullptr;
-            VkDeviceSize offset = 0;
-            VkMemoryMapFlags flags = 0;
-            VkResult res = vkMapMemory(*m_device, stagingBuffer.m_mem, offset,
-                stagingBuffer.m_allocationSize, flags, &pMem);
-            CHECK_VK_RESULT(res, "vkMapMemory transform staging\n");
-
-            // Step 3: Copy the transformation matrix to the staging buffer
-            memcpy(pMem, transformMatrix, sizeof(transformMatrix));
-
-            // Step 4: Unmap/release the mapped memory
-            vkUnmapMemory(*m_device, stagingBuffer.m_mem);
-
-            // Step 5: Create the final buffer
-            VkBufferUsageFlags finalUsage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
-                VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-            VkMemoryPropertyFlags finalMemProps = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-            transformBuffer = m_vkcore->CreateBufferACC(sizeof(transformMatrix), finalUsage, finalMemProps);
-
-            // Step 6: Copy the staging buffer to the final buffer
-            m_vkcore->CopyBufferToBuffer(transformBuffer.m_buffer, stagingBuffer.m_buffer, sizeof(transformMatrix));
-
-            // Step 7: Release the resources of the staging buffer
-            stagingBuffer.Destroy(*m_device);
-
-            transformAddress = GetBufferDeviceAddress(*m_device, transformBuffer.m_buffer);
-            triangles.transformData.deviceAddress = transformAddress;
-            input.m_transBuffer = transformBuffer;
-            printf("%zd", transformAddress);
-        }*/
+        triangles.maxVertex = (uint32_t)(model.verts.size() - 1);
 
         // Identify the above data as containing opaque triangles.
         VkAccelerationStructureGeometryKHR asGeom{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
@@ -171,7 +107,7 @@ namespace core {
             auto blas = objectToVkGeometryKHR(obj);
             allBlas.emplace_back(blas);
             colors.push_back(glm::vec3(obj.color.r,obj.color.g,obj.color.g));
-            //printf("color en createBLAS: %f %f %f\n", obj.color.r, obj.color.g, obj.color.b);
+            printf("color en createBLAS: %f %f %f\n", obj.color.r, obj.color.g, obj.color.b);
         }
 
         //printf("size of allblas: %d\n", allBlas.size());
@@ -1129,9 +1065,10 @@ namespace core {
             exit(1);
         }
 
-        colors.clear();
-        for (const core::SimpleMesh& mesh : meshes) {
-            colors.push_back(glm::vec3(mesh.color.r, mesh.color.g, mesh.color.b));
+        //colors.clear();
+        for (glm::vec3& color: colors) {
+            //colors.push_back(glm::vec3(mesh.color.r, mesh.color.g, mesh.color.b));
+            printf("Pushed Back color: %d %d %d\n", color.r, color.g, color.b);
         }
 
         CreateGeometryBuffers(meshes);

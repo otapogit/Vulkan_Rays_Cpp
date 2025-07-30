@@ -24,13 +24,6 @@ find_package(OpenGL REQUIRED)
         )
     endif()
 
-# GLFW
-FetchContent_Declare(
-    glfw
-    GIT_REPOSITORY https://github.com/glfw/glfw.git
-    GIT_TAG        3.3.8
-)
-FetchContent_MakeAvailable(glfw)
 
 # GLSLang (GLSL to SPIR-V compiler)
 FetchContent_Declare(
@@ -38,6 +31,14 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
     GIT_TAG        main
 )
+
+# GLFW
+FetchContent_Declare(
+    glfw
+    GIT_REPOSITORY https://github.com/glfw/glfw.git
+    GIT_TAG        3.3.8
+)
+FetchContent_MakeAvailable(glfw)
 
 set (ENABLE_OPT "0")
 set(ENABLE_GLSLANG_BINARIES "OFF")
@@ -57,7 +58,7 @@ target_link_libraries(VulkanRenderer
 	PRIVATE  glslang-default-resource-limits
 	PRIVATE OpenGL::GL
 	PRIVATE GLEW::GLEW
-	PRIVATE glfw
+        PRIVATE glfw
 )
 target_compile_features(VulkanRenderer PUBLIC cxx_std_17)
 

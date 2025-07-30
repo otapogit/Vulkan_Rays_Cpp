@@ -274,10 +274,10 @@ int main(int argc, char* argv[]) {
     CameraGLFWController::setupCallbacks(window, m_pCamera);
 
     m_Renderer.init();
-    initOBJ();
-   // initRT();
+    //initOBJ();
+    initRT();
     m_Renderer.setOutputResolution(m_windowwidth, m_windowheight);
-    m_Renderer.save(false, window);
+    m_Renderer.save(false);
     m_Renderer.render();
 
     glfwMakeContextCurrent(window);
@@ -516,17 +516,30 @@ void initRT(){
     };
     uint32_t diagonalMeshId = createMesh(diagonalMesh, diagonalIndices, &m_Renderer);
 
+    std::vector<Vertex> plane = {
+    Vertex({-4.0f, -4.0f, -4.0f}, {0.0f, 0.0f}, {0.f, 1.f, 0.f}), // 0
+    Vertex({-4.0f, -4.0f, 4.0f}, {1.0f, 0.0f}, {0.f, 1.f, 0.f}), // 1
+    Vertex({4.0f, -4.0f, -4.0f}, {1.0f, 1.0f}, {0.f, 1.f, 0.f}), // 2
+    Vertex({4.0f, -4.0f, 4.0f}, {0.0f, 1.0f}, {0.f, 1.f, 0.f})  // 3
+    };
+    std::vector<uint32_t> planeinds = {
+        0, 1, 2,
+        1, 3, 2
+    };
+    uint32_t planeId = createMesh(plane, planeinds, &m_Renderer);
+
 
     uint32_t meshid = m_Renderer.defineMesh(vertData, normData, uvData, indices);
     printf("Mesh Defined\n");
 
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f,0.0f,0.0f), meshid);
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(0.0f,1.0f,0.0f), topMeshId);
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(0.0f,0.0f,1.0f), bottomMeshId);
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f,1.0f,1.0f), diagonalMeshId);
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f,1.0f,0.0f), frontMeshId);
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), rightMeshId);
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), leftMeshId);
+    m_Renderer.addLight(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), meshid, glm::vec3(1.0f,0.0f,0.0f),0,0);
+    //m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 0.f, 0.f)), glm::vec3(1.0f, 0.0f, 0.0f), meshid);
+    //m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.f, 0.f)), glm::vec3(1.0f,0.0f,0.0f), topMeshId);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 0.f)), glm::vec3(1.0f,1.0f,1.0f), planeId);
+    //m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f,1.0f,1.0f), diagonalMeshId);
+    //m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f,1.0f,0.0f), frontMeshId);
+    //m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), rightMeshId);
+    //m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), leftMeshId);
 
     m_Renderer.setCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
     //m_Renderer.setCamera(glm::mat4(1.0f), glm::mat4(1.0f));

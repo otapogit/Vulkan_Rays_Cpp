@@ -77,17 +77,19 @@ void main() {
         v2 * barycentricCoords.z;
 
     //condicion de terminación
-    /*
+    
     if(textureIndexBuffers.textureIndex[meshIndex] >=0){
         rayPayload.color = colorBuffer.colors[meshIndex];
+        //rayPayload.color = vec3(1.0, 0.0, 1.0); 
         rayPayload.hit = true;
-    }*/
+    }else{
 
 
     //Color a pasar
     vec3 baseColor;
     
     //Color en funcion de rebotes
+    /*
     if (rayPayload.depth == 0) {
         baseColor = vec3(1.0,0.0,0.0);   // Rojo - primer impacto
     } else if (rayPayload.depth == 1) {
@@ -100,7 +102,7 @@ void main() {
         baseColor = vec3(1.0, 0.0, 1.0); // Magenta - cuarto rebote
     } else {
         baseColor = vec3(0.0, 1.0, 1.0); // Cian - quinto rebote o más
-    }
+    }*/
 
     
 
@@ -159,7 +161,8 @@ void main() {
         rayPayload.color = baseColor; 
 
         //Cambiar a false para no propagar color
-        rayPayload.hit = true;
+        rayPayload.hit = false;
+    }
     }
     //rayPayload.color = baseColor; 
     

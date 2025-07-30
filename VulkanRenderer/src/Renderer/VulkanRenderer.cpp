@@ -21,10 +21,7 @@
 #include <GL/wglew.h>
 
 #include "Renderer/VulkanRenderer.h"
-#ifdef _WIN32
-#include <GLFW/glfw3native.h>  // Importante: debes incluir esto
-#endif
-#include <GLFW/glfw3.h>
+
 #include <GL/gl.h>      // Para funciones básicas de OpenGL
 #include <GL/glu.h>     // Para funciones de utilidad (opcional)
 
@@ -95,7 +92,6 @@ class VulkanRenderer::Impl {
         m_renderPass = m_vkcore.CreateSimpleRenderPass();
         m_frameBuffers = m_vkcore.CreateFrameBuffers(m_renderPass);
 
-        //Creo que los framebuffers no hacen falta tampoco xq voy a hacer offscreen rendering??? nse la verda
 
         m_outTexture = new core::VulkanTexture();
 
@@ -187,14 +183,16 @@ the scene with Renderer::addMesh
         }
         if (tid == -1) return false;
 
-        meshesC[tid].m_transMat = modelMatrix;
+        m_meshesDraw.push_back(meshesC[tid]);
 
-        meshesC[tid].color = glm::vec3(color);
+        m_meshesDraw.back().m_transMat = modelMatrix;
+
+        m_meshesDraw.back().color = glm::vec3(color);
 
         std::vector<glm::vec3> modelverts = {};
         std::vector<glm::vec3> modelnorms = {};
 
-        for (const glm::vec3& vert : meshesC[tid].verts) {
+        for (const glm::vec3& vert : m_meshesDraw.back().verts) {
             glm::vec4 homogeneousVert = glm::vec4(vert, 1.0f);
 
             // Multiplicar por la matriz de transformación
@@ -204,7 +202,7 @@ the scene with Renderer::addMesh
             modelverts.push_back(glm::vec3(transformedVert));
         }
 
-        for (const glm::vec3& norm : meshesC[tid].norms) {
+        for (const glm::vec3& norm : m_meshesDraw.back().norms) {
             // Para normales usamos w=0.0f porque no queremos que se vean afectadas por la traslación
             glm::vec4 homogeneousNorm = glm::vec4(norm, 0.0f);
 
@@ -216,13 +214,13 @@ the scene with Renderer::addMesh
         }
 
         //meshesC[tid].
-        meshesC[tid].m_vertexBufferSize = sizeof(modelverts[0]) * modelverts.size();
-        meshesC[tid].m_vb = m_vkcore.CreateVertexBuffer(modelverts.data(), meshesC[tid].m_vertexBufferSize, true);
-        meshesC[tid].m_normalbuffer = m_vkcore.CreateNormalBuffer(modelnorms, true);
+        m_meshesDraw.back().m_vertexBufferSize = sizeof(modelverts[0]) * modelverts.size();
+        m_meshesDraw.back().m_vb = m_vkcore.CreateVertexBuffer(modelverts.data(), m_meshesDraw.back().m_vertexBufferSize, true);
+        m_meshesDraw.back().m_normalbuffer = m_vkcore.CreateNormalBuffer(modelnorms, true);
      
         
         //m_meshesDraw contiene las meshes que se dibujarán
-        m_meshesDraw.push_back(meshesC[tid]);
+        
         printf("Color copiado: %f %f %f\n", m_meshesDraw.back().color.r, m_meshesDraw.back().color.g, m_meshesDraw.back().color.b);
 
         return true;
@@ -355,10 +353,6 @@ instances in the scene)
      */
      uint32_t getResultTextureId() {
         //Mirar el interop
-         if (!m_pWindow) {
-             std::cerr << "Error: No hay ventana GLFW disponible" << std::endl;
-             return 0;
-         }
 
 
          if (!m_outTexture || !m_outTexture->m_mem) {
@@ -507,9 +501,9 @@ instances in the scene)
 
     }
 
-     void save(bool s, GLFWwindow* window) {
+     void save(bool s) {
          saving = s;
-         m_pWindow = window;
+         //m_pWindow = window;
      }
 
     private:
@@ -539,7 +533,7 @@ instances in the scene)
         VkDevice m_device = NULL;
         int m_numImages = 0;
         std::vector<VkCommandBuffer> m_cmdBufs;
-        GLFWwindow* m_pWindow;
+        //GLFWwindow* m_pWindow;
         VkRenderPass m_renderPass;
         std::vector<VkFramebuffer> m_frameBuffers;
 
@@ -638,6 +632,6 @@ uint32_t VulkanRenderer::getResultTextureId() {
     return pImpl->getResultTextureId();
 }
 
-void VulkanRenderer::save(bool s, GLFWwindow* window) {
-    pImpl->save(s,window);
+void VulkanRenderer::save(bool s) {
+    pImpl->save(s);
 }

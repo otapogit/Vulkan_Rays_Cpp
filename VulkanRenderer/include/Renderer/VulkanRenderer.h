@@ -1,6 +1,5 @@
 #pragma once
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include "Renderer.h"
 #include <memory>
 #include <vector>
@@ -126,7 +125,7 @@ public:
      * @brief Enable/disable saving rendered images
      * @param s save flag
      */
-    void save(bool s, GLFWwindow* window);
+    void save(bool s);
 
 private:
     class Impl;
