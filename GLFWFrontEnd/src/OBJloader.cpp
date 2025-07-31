@@ -21,17 +21,18 @@ public:
         Assimp::Importer importer;
 
         // Cargar el archivo con post-procesamiento más completo
-        /*const aiScene* scene = importer.ReadFile(filepath,
+        const aiScene* scene = importer.ReadFile(filepath,
             aiProcess_Triangulate |      // Convertir a triángulos
-            //aiProcess_GenNormals            // Generar normales si no las tiene
+            aiProcess_GenSmoothNormals |            // Generar normales si no las tiene
             aiProcess_FlipUVs |               // Voltear coordenadas UV (común en OBJ)
             aiProcess_JoinIdenticalVertices | // Unir vértices idénticos
-            aiProcess_ValidateDataStructure  // Validar estructura de datos
-        );*/
-
-        const aiScene* scene = importer.ReadFile(filepath,
-            0
+            aiProcess_ValidateDataStructure |  // Validar estructura de datos
+            aiProcess_FixInfacingNormals        // Corregir normales hacia adentro
         );
+
+        //const aiScene* scene = importer.ReadFile(filepath,
+        //    0
+        //);
 
         printf("Imported mesh at %s\n", filepath);
 
@@ -50,6 +51,8 @@ public:
         std::cout << "Coordenadas de textura: " << texCoords.size() << std::endl;
         std::cout << "Indices: " << indices.size() << std::endl;
         std::cout << "Triángulos: " << indices.size() / 3 << std::endl;
+
+        validateNormals();
 
         return true;
     }
@@ -216,6 +219,7 @@ public:
         return result;
     }
 
+
     // Método para imprimir estadísticas
     void printStats() const {
         std::cout << "\n=== Estadísticas del modelo ===" << std::endl;
@@ -310,6 +314,96 @@ private:
             else {
                 std::cerr << "Advertencia: Face con " << face.mNumIndices << " vértices encontrada" << std::endl;
             }
+        }
+    }
+
+
+    // Método para validar las normales generadas
+    void validateNormals() {
+        std::cout << "\n=== VALIDANDO NORMALES GENERADAS ===" << std::endl;
+
+        int validNormals = 0;
+        int invalidNormals = 0;
+
+        for (size_t i = 0; i < normals.size(); i++) {
+            glm::vec3& normal = normals[i];
+            float length = glm::length(normal);
+
+            // Verificar que la normal está normalizada
+            if (length >= 0.9f && length <= 1.1f) {
+                validNormals++;
+            }
+            else {
+                invalidNormals++;
+                // Normalizar si no está normalizada
+                if (length > 0.0001f) {
+                    normal = glm::normalize(normal);
+                }
+                else {
+                    // Normal cero, usar normal por defecto
+                    normal = glm::vec3(0.0f, 1.0f, 0.0f);
+                }
+            }
+        }
+
+        std::cout << "Normales válidas: " << validNormals << std::endl;
+        std::cout << "Normales corregidas: " << invalidNormals << std::endl;
+
+        // Verificar consistencia geométrica en una muestra
+        validateGeometricConsistency();
+    }
+
+    void validateGeometricConsistency() {
+        std::cout << "Verificando consistencia geométrica..." << std::endl;
+
+        int consistentTriangles = 0;
+        int inconsistentTriangles = 0;
+        int sampleSize = std::min(100, (int)(indices.size() / 3)); // Probar 100 triángulos
+
+        for (int t = 0; t < sampleSize; t++) {
+            int triangleIndex = t * 3;
+
+            uint32_t i0 = indices[triangleIndex];
+            uint32_t i1 = indices[triangleIndex + 1];
+            uint32_t i2 = indices[triangleIndex + 2];
+
+            if (i0 >= vertices.size() || i1 >= vertices.size() || i2 >= vertices.size()) {
+                continue;
+            }
+
+            // Calcular normal geométrica
+            glm::vec3 v0 = vertices[i0];
+            glm::vec3 v1 = vertices[i1];
+            glm::vec3 v2 = vertices[i2];
+
+            glm::vec3 edge1 = v1 - v0;
+            glm::vec3 edge2 = v2 - v0;
+            glm::vec3 geometricNormal = glm::normalize(glm::cross(edge1, edge2));
+
+            // Comparar con normal promedio de los vértices
+            glm::vec3 avgVertexNormal = glm::normalize(
+                (normals[i0] + normals[i1] + normals[i2]) / 3.0f
+            );
+
+            float dot = glm::dot(geometricNormal, avgVertexNormal);
+
+            if (dot > 0.5f) {
+                consistentTriangles++;
+            }
+            else {
+                inconsistentTriangles++;
+            }
+        }
+
+        std::cout << "Muestra de " << sampleSize << " triángulos:" << std::endl;
+        std::cout << "  Consistentes: " << consistentTriangles << std::endl;
+        std::cout << "  Inconsistentes: " << inconsistentTriangles << std::endl;
+
+        float consistencyRatio = (float)consistentTriangles / (consistentTriangles + inconsistentTriangles);
+        std::cout << "  Ratio de consistencia: " << (consistencyRatio * 100.0f) << "%" << std::endl;
+
+        if (consistencyRatio < 0.8f) {
+            std::cout << "ADVERTENCIA: Baja consistencia en normales. Considera usar aiProcess_GenNormals en lugar de aiProcess_GenSmoothNormals" << std::endl;
         }
     }
 

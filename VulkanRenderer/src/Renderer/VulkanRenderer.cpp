@@ -81,7 +81,7 @@ class VulkanRenderer::Impl {
      bool init()  {
         //Esto primero tiene que irse
         //m_pWindow = core::glwf_vulkan_init(1080, 1080, "AppName");
-        glewInit();
+        //glewInit();
         m_vkcore.Init("AppName", 1920,1080);
 
         m_device = m_vkcore.GetDevice();
@@ -216,11 +216,12 @@ the scene with Renderer::addMesh
         //meshesC[tid].
         m_meshesDraw.back().m_vertexBufferSize = sizeof(modelverts[0]) * modelverts.size();
         m_meshesDraw.back().m_vb = m_vkcore.CreateVertexBuffer(modelverts.data(), m_meshesDraw.back().m_vertexBufferSize, true);
+
         m_meshesDraw.back().m_normalbuffer = m_vkcore.CreateNormalBuffer(modelnorms, true);
      
         
         //m_meshesDraw contiene las meshes que se dibujarán
-        
+
         printf("Color copiado: %f %f %f\n", m_meshesDraw.back().color.r, m_meshesDraw.back().color.g, m_meshesDraw.back().color.b);
 
         return true;

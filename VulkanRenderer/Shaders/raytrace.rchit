@@ -63,6 +63,11 @@ void main() {
     // Coordenadas barycéntricas del hit    
     const vec3 barycentricCoords = vec3(1.0f - attribs.x - attribs.y, attribs.x, attribs.y);
     
+    // Calcular la normal geométrica del triángulo
+    vec3 edge1 = v1 - v0;
+    vec3 edge2 = v2 - v0;
+    vec3 geometricNormal = normalize(cross(edge1, edge2));
+
 
     vec3 interpolatedNormal = normalize(
         n0 * barycentricCoords.x + 
@@ -77,7 +82,38 @@ void main() {
         v2 * barycentricCoords.z;
 
     //condicion de terminación
+
+        // CORRECCIÓN: Decidir qué normal usar basándose en su consistencia
+    vec3 finalNormal;
     
+    // Verificar si la normal interpolada es consistente con la geométrica
+    float similarity = dot(geometricNormal, interpolatedNormal);
+    
+    if (abs(similarity) > 0.5) {
+        // Las normales son razonablemente consistentes
+        if (similarity < 0.0) {
+            // La normal interpolada apunta en dirección opuesta, voltearla
+            finalNormal = -interpolatedNormal;
+        } else {
+            // Usar la normal interpolada tal como está
+            finalNormal = interpolatedNormal;
+        }
+    } else {
+        // Las normales son muy inconsistentes, usar la geométrica
+        finalNormal = geometricNormal;
+    }
+    
+    if (dot(finalNormal, -gl_WorldRayDirectionEXT) < 0.0) {
+    finalNormal = -finalNormal; // Flip if facing away
+    }
+
+    // Asegurar que la normal esté normalizada
+    finalNormal = normalize(finalNormal);
+
+    /////////////////////////////////////////////
+    ///////////CONDICION TERMINACIÓN////////////////    
+    /////////////////////////////////////////////////
+
     if(textureIndexBuffers.textureIndex[meshIndex] >=0){
         rayPayload.color = colorBuffer.colors[meshIndex];
         //rayPayload.color = vec3(1.0, 0.0, 1.0); 
@@ -85,11 +121,17 @@ void main() {
     }else{
 
 
+    int debugColor = 5;
+
+
     //Color a pasar
     vec3 baseColor;
     
+    switch(debugColor){
+    
+    case 1:
     //Color en funcion de rebotes
-    /*
+    
     if (rayPayload.depth == 0) {
         baseColor = vec3(1.0,0.0,0.0);   // Rojo - primer impacto
     } else if (rayPayload.depth == 1) {
@@ -102,19 +144,63 @@ void main() {
         baseColor = vec3(1.0, 0.0, 1.0); // Magenta - cuarto rebote
     } else {
         baseColor = vec3(0.0, 1.0, 1.0); // Cian - quinto rebote o más
-    }*/
+    }
+    break;
 
+   case 2:
     
-
-    const int MAX_DEPTH = 2;
-
-    vec3 incomingDirection = gl_WorldRayDirectionEXT;
+    // Calcular la dirección hacia la cámara (inversa del rayo incidente)
+    vec3 viewDirection = -normalize(gl_WorldRayDirectionEXT);
     
+    // Calcular el factor de sombreado basado en el ángulo entre normal y dirección de vista
+    // dot(normal, viewDir) da 1 cuando son paralelos (perpendicular a la superficie vista de frente)
+    // y 0 cuando son perpendiculares (superficie vista de lado)
+    float shadingFactor = dot(finalNormal, viewDirection);
+    
+    // Asegurar que el factor esté en el rango [0, 1]
+    shadingFactor = max(0.0, shadingFactor);
+
     //Shading básico para el color base
-    baseColor = colorBuffer.colors[meshIndex]* ((dot(incomingDirection, interpolatedNormal)+1)/2); // Rojo - primer impacto
-    
+    baseColor = colorBuffer.colors[meshIndex]* (1-shadingFactor); 
+
+    break;
+
+    case 3:
     //Color plano
-    //baseColor = colorBuffer.colors[meshIndex];
+    baseColor = colorBuffer.colors[meshIndex];
+    break;
+
+    case 4: // Visualizar normales como colores RGB
+    baseColor = normalize((interpolatedNormal + 1.0) * 0.5); // Convertir de [-1,1] a [0,1]
+    break;
+
+    
+    case 5: // Visualizar normales como colores RGB
+    baseColor = normalize((geometricNormal + 1.0) * 0.5); // Convertir de [-1,1] a [0,1]
+    break;
+
+    default:
+
+    vec3 edge1 = v1 - v0;
+    vec3 edge2 = v2 - v0;
+    vec3 geometricNormal = normalize(cross(edge1, edge2));
+            
+    // Comparar con normal interpolada
+    float similarity = dot(geometricNormal, interpolatedNormal);
+            
+    if (similarity > 0.8) {
+        baseColor = vec3(0.0, 1.0, 0.0); // Verde: consistentes
+    } else if (similarity > 0.0) {
+        baseColor = vec3(1.0, 1.0, 0.0); // Amarillo: parcialmente consistentes
+    } else {
+        baseColor = vec3(1.0, 0.0, 0.0); // Rojo: inconsistentes
+    }
+    break;
+    }
+
+     vec3 incomingDirection = gl_WorldRayDirectionEXT;
+     const int MAX_DEPTH = 2;
+
 
    // Si no hemos alcanzado la profundidad máxima, lanzar rayo de reflexión
     if (rayPayload.depth < MAX_DEPTH && dot(incomingDirection, interpolatedNormal) > 0.0) {

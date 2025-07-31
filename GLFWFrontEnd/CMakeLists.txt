@@ -17,7 +17,7 @@ FetchContent_MakeAvailable(assimp)
 
 add_executable(GLFWFrontEnd src/main.cpp)
 
-file (GLOB SOURCES "src/*.cpp" "include/*.h")
+file (GLOB SOURCES "src/*.cpp" "include/*.h" "include/*.hpp")
 target_sources(GLFWFrontEnd PRIVATE ${SOURCES})
 
 target_include_directories(GLFWFrontEnd 
@@ -26,14 +26,14 @@ target_include_directories(GLFWFrontEnd
 )
 
 # PGUPV 
-FetchContent_Declare(
-    pgupv
-    GIT_REPOSITORY https://github.com/fjabad/pgupv.git
-    GIT_TAG        master  # o main, dependiendo de la rama principal
-)
+#FetchContent_Declare(
+#    pgupv
+#    GIT_REPOSITORY https://github.com/fjabad/pgupv.git
+#    GIT_TAG        master  # o main, dependiendo de la rama principal
+#)
 
 # Hacer disponible PGUPV
-FetchContent_MakeAvailable(pgupv)
+#FetchContent_MakeAvailable(pgupv)
 
 
     
@@ -43,7 +43,7 @@ target_link_libraries(GLFWFrontEnd
     PRIVATE VulkanRenderer
     PRIVATE GLRenderer
     PRIVATE glfw
-    PRIVATE PGUPV
+    #PRIVATE PGUPV
     PRIVATE assimp
 )
 

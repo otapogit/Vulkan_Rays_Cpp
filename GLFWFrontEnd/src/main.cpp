@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "OBJloader.cpp"
+#include "OBJ_Loader.h"
 
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
@@ -16,6 +17,11 @@
 #include <windows.h>
 
 #include <GL/gl.h>
+
+#include "json.hpp"
+#define TINYGLTF_IMPLEMENTATION
+#include "tiny_gltf.h"
+
 
 #include <3rdParty/stb_image_write.h>
 
@@ -59,6 +65,8 @@ static uint32_t createMesh(const std::vector<Vertex>& vertices, const std::vecto
 
 void initRT();
 void initOBJ();
+void initOBJ_l();
+void initGLTF();
 void CreateCamera(glm::vec3 pos);
 void CreateCamera(glm::vec3 pos, float FOV, float znear, float zfar);
 
@@ -237,18 +245,19 @@ int main(int argc, char* argv[]) {
     // Hacer la ventana actual
     glfwMakeContextCurrent(window);
 
-
+    /*
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
         std::cerr << "Error: No se pudo inicializar GLEW" << std::endl;
         glfwTerminate();
         return -4;
-    }
+    }*/
     bool hasMemoryObject = false;
     bool hasMemoryObjectWin32 = false;
     bool hasSemaphore = false;
     bool hasSemaphoreWin32 = false;
-
+    
+    /*
     GLint nExtensions;
     glGetIntegerv(GL_NUM_EXTENSIONS, &nExtensions);
 
@@ -265,17 +274,17 @@ int main(int argc, char* argv[]) {
     }
     else {
         std::cerr << "Faltan extensiones para interoperabilidad Vulkan-OpenGL\n";
-    }
+    }*/
 
     // Activar v-sync
     glfwSwapInterval(1);
 
-    CreateCamera(glm::vec3(1.f, 5.f, 1.f));
+    CreateCamera(glm::vec3(1.f, 0.f, 1.f));
     CameraGLFWController::setupCallbacks(window, m_pCamera);
 
     m_Renderer.init();
-    //initOBJ();
-    initRT();
+    initGLTF();
+    //initRT();
     m_Renderer.setOutputResolution(m_windowwidth, m_windowheight);
     m_Renderer.save(false);
     m_Renderer.render();
@@ -366,13 +375,53 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
+#pragma region meshloaders
+void initOBJ_l() {
+
+    objl::Loader Loader;
+
+    // Load .obj File
+    bool loadout = Loader.LoadFile("../GLFWFrontEnd/OBJ/VW_Touran_2007.obj");
+
+    std::vector<glm::vec3> vertices = {};
+    std::vector<glm::vec3> normals = {};
+    std::vector<glm::vec2> uvs = {};
+    for (const auto& vert : Loader.LoadedVertices) {
+        vertices.push_back(glm::vec3(vert.Position.X, vert.Position.Y, vert.Position.Z));
+
+        normals.push_back(glm::vec3(vert.Normal.X, vert.Normal.Y, vert.Normal.Z));
+
+        uvs.push_back(glm::vec2(vert.TextureCoordinate.X, vert.TextureCoordinate.Y));
+    }
+
+    uint32_t vanId = m_Renderer.defineMesh(vertices, normals, uvs, Loader.LoadedIndices);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f, 0.f)), glm::vec3(1.0f), vanId);
+
+    // 6. MALLA TRASERA (plano vertical al fondo)
+    std::vector<Vertex> backMesh = {
+        Vertex({ 8.0f, -6.0f, -12.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}), // 0
+        Vertex({-8.0f, -6.0f, -12.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}), // 1
+        Vertex({-8.0f,  6.0f, -12.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}), // 2
+        Vertex({ 8.0f,  6.0f, -12.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f})  // 3
+    };
+    std::vector<uint32_t> backIndices = {
+        0, 1, 2,
+        0, 2, 3
+    };
+    uint32_t backMeshId = createMesh(backMesh, backIndices, &m_Renderer);
+
+    m_Renderer.addLight(glm::mat4(1.f), backMeshId, glm::vec3(1.0f, 0.0f, 1.0f), 1, 1);
+}
+
 void initOBJ() {
 
     OBJLoader loader;
-    // Cargar el archivo OBJ
-    if (loader.loadOBJOptimized("../GLFWFrontEnd/OBJ/free_car_001.obj")) {
+    // Cargar el archivo OBJ VW_Touran_2007
+    //if (loader.loadOBJOptimized("../GLFWFrontEnd/OBJ/free_car_001.obj")) {
+    if (loader.loadOBJ("../GLFWFrontEnd/OBJ/VW_Touran_2007.obj")) {
         loader.analyzeVertexDuplication();
         
+        //loader.checkNormalConsistency();
         // Obtener los datos
         auto vertices = loader.getVertices();
         auto normals = loader.getNormals();
@@ -547,6 +596,158 @@ void initRT(){
     printf("Rendered everything\n");
 }
 
+bool ExtractMeshAttributes(const tinygltf::Model& model, const tinygltf::Primitive& primitive,
+    std::vector<glm::vec3>& outVertices,
+    std::vector<glm::vec3>& outNormals,
+    std::vector<glm::vec2>& outUVs,
+    std::vector<uint32_t>& outIndices);
+
+void initGLTF() {
+    tinygltf::TinyGLTF loader;
+    tinygltf::Model model;
+
+    std::string err = "Error cargando modelo";
+
+    std::string warn = "Warning: posible peligro cargando modelo";
+
+    //free_car_001.obj
+    //VW_Touran_2007
+    bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, "../GLFWFrontEnd/OBJ/VW_Touran_2007.glb");
+    //bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, "../GLFWFrontEnd/OBJ/free_car_001.glb");
+
+    if (!warn.empty()) {
+        std::cout << "Warning: " << warn << std::endl;
+    }
+    if (!err.empty()) {
+        std::cerr << "Error: " << err << std::endl;
+    }
+    if (!ret) {
+        std::cerr << "Failed to load .glb" << std::endl;
+        return;
+    }
+
+    for (const auto& mesh : model.meshes) {
+        for (const auto& prim : mesh.primitives) {
+            std::vector<glm::vec3> vertices;
+            std::vector<glm::vec3> normals;
+            std::vector<glm::vec2> uvs;
+            std::vector<uint32_t> indices;
+
+            if (ExtractMeshAttributes(model, prim, vertices, normals, uvs, indices)) {
+                uint32_t id = m_Renderer.defineMesh(vertices, normals, uvs, indices);
+                m_Renderer.addMesh(glm::mat4(1.0f), glm::vec3(1.0f), id);
+            }
+        }
+    }
+
+    // 6. MALLA TRASERA (plano vertical al fondo)
+    std::vector<Vertex> backMesh = {
+        Vertex({ 8.0f, -6.0f, -12.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}), // 0
+        Vertex({-8.0f, -6.0f, -12.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}), // 1
+        Vertex({-8.0f,  6.0f, -12.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}), // 2
+        Vertex({ 8.0f,  6.0f, -12.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f})  // 3
+    };
+    std::vector<uint32_t> backIndices = {
+        0, 1, 2,
+        0, 2, 3
+    };
+    uint32_t backMeshId = createMesh(backMesh, backIndices, &m_Renderer);
+
+}
+
+bool ExtractMeshAttributes(const tinygltf::Model& model, const tinygltf::Primitive& primitive,
+    std::vector<glm::vec3>& outVertices,
+    std::vector<glm::vec3>& outNormals,
+    std::vector<glm::vec2>& outUVs,
+    std::vector<uint32_t>& outIndices) {
+    auto getBufferViewData = [&](int accessorIndex) -> const unsigned char* {
+        const auto& accessor = model.accessors[accessorIndex];
+        const auto& view = model.bufferViews[accessor.bufferView];
+        const auto& buffer = model.buffers[view.buffer];
+        return &buffer.data[view.byteOffset + accessor.byteOffset];
+        };
+
+    // === INDICES ===
+    if (primitive.indices < 0) {
+        std::cerr << "Mesh has no indices, skipping." << std::endl;
+        return false;
+    }
+
+    const auto& indexAccessor = model.accessors[primitive.indices];
+    const auto& indexView = model.bufferViews[indexAccessor.bufferView];
+    const auto& indexBuffer = model.buffers[indexView.buffer];
+    const unsigned char* indexData = &indexBuffer.data[indexView.byteOffset + indexAccessor.byteOffset];
+
+    outIndices.resize(indexAccessor.count);
+
+    for (size_t i = 0; i < indexAccessor.count; ++i) {
+        switch (indexAccessor.componentType) {
+        case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+            outIndices[i] = ((const uint16_t*)indexData)[i];
+            break;
+        case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+            outIndices[i] = ((const uint32_t*)indexData)[i];
+            break;
+        case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+            outIndices[i] = ((const uint8_t*)indexData)[i];
+            break;
+        default:
+            std::cerr << "Unsupported index type\n";
+            return false;
+        }
+    }
+
+    // === POSITION ===
+    if (primitive.attributes.find("POSITION") == primitive.attributes.end()) {
+        std::cerr << "Mesh missing POSITION attribute\n";
+        return false;
+    }
+    const float* positionData = reinterpret_cast<const float*>(getBufferViewData(primitive.attributes.at("POSITION")));
+
+    // === NORMAL ===
+    const float* normalData = nullptr;
+    if (primitive.attributes.find("NORMAL") != primitive.attributes.end()) {
+        normalData = reinterpret_cast<const float*>(getBufferViewData(primitive.attributes.at("NORMAL")));
+    }
+
+    // === TEXCOORD_0 ===
+    const float* uvData = nullptr;
+    if (primitive.attributes.find("TEXCOORD_0") != primitive.attributes.end()) {
+        uvData = reinterpret_cast<const float*>(getBufferViewData(primitive.attributes.at("TEXCOORD_0")));
+    }
+
+    size_t vertexCount = model.accessors[primitive.attributes.at("POSITION")].count;
+    outVertices.reserve(vertexCount);
+    outNormals.reserve(vertexCount);
+    outUVs.reserve(vertexCount);
+
+    for (size_t i = 0; i < vertexCount; ++i) {
+        glm::vec3 pos(positionData[i * 3 + 0], positionData[i * 3 + 1], positionData[i * 3 + 2]);
+        outVertices.push_back(pos);
+
+        if (normalData) {
+            glm::vec3 n(normalData[i * 3 + 0], normalData[i * 3 + 1], normalData[i * 3 + 2]);
+            outNormals.push_back(n);
+        }
+        else {
+            outNormals.push_back(glm::vec3(0.0f));  // dummy normal
+        }
+
+        if (uvData) {
+            glm::vec2 uv(uvData[i * 2 + 0], uvData[i * 2 + 1]);
+            outUVs.push_back(uv);
+        }
+        else {
+            outUVs.push_back(glm::vec2(0.0f));  // dummy UV
+        }
+    }
+
+    return true;
+}
+
+#pragma endregion
+
+#pragma region camera
 void CreateCamera(glm::vec3 pos) {
 
     float FOV = 45.0f;
@@ -567,3 +768,4 @@ void CreateCamera(glm::vec3 pos, float FOV, float znear, float zfar) {
 
     m_pCamera = new CameraFirstPerson(pos, Target, Up, FOV, m_windowwidth, m_windowheight, znear, zfar);
 }
+#pragma endregion
