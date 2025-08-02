@@ -6,7 +6,7 @@
 #extension GL_EXT_nonuniform_qualifier : enable
 
 layout(set = 2, binding = 0) readonly buffer VertexBuffers {
-    vec3 vertices[];
+    vec4 vertices[];
 } vertexBuffers[];
 
 layout(set = 2, binding = 1) readonly buffer IndexBuffers {
@@ -14,7 +14,7 @@ layout(set = 2, binding = 1) readonly buffer IndexBuffers {
 } indexBuffers[];
 
 layout(set = 2, binding = 2) readonly buffer NormalBuffers {
-    vec3 normals[];
+    vec4 normals[];
 } normalBuffers[];
 
 layout(set = 2, binding = 3) readonly buffer TextureIndexBuffers {
@@ -22,7 +22,7 @@ layout(set = 2, binding = 3) readonly buffer TextureIndexBuffers {
 } textureIndexBuffers; //Arrays de 1 numero
 
 layout(set = 2, binding = 4) restrict readonly buffer ColorBuffer {
-    vec3 colors[];
+    vec4 colors[];
 } colorBuffer;
 
 layout(set = 2, binding = 5) uniform sampler2D textures[];
@@ -51,13 +51,13 @@ void main() {
     uint i2 = indexBuffers[meshIndex].indices[primitiveIndex * 3 + 2];
     
     // Obtener los vértices del triángulo
-    vec3 v0 = vertexBuffers[meshIndex].vertices[i0];
-    vec3 v1 = vertexBuffers[meshIndex].vertices[i1];
-    vec3 v2 = vertexBuffers[meshIndex].vertices[i2];
+    vec3 v0 = vertexBuffers[meshIndex].vertices[i0].xyz;
+    vec3 v1 = vertexBuffers[meshIndex].vertices[i1].xyz;
+    vec3 v2 = vertexBuffers[meshIndex].vertices[i2].xyz;
 
-    vec3 n0 = normalBuffers[meshIndex].normals[i0];
-    vec3 n1 = normalBuffers[meshIndex].normals[i1];
-    vec3 n2 = normalBuffers[meshIndex].normals[i2];
+    vec3 n0 = normalBuffers[meshIndex].normals[i0].xyz;
+    vec3 n1 = normalBuffers[meshIndex].normals[i1].xyz;
+    vec3 n2 = normalBuffers[meshIndex].normals[i2].xyz;
 
 
     // Coordenadas barycéntricas del hit    
@@ -83,7 +83,7 @@ void main() {
 
     //condicion de terminación
 
-        // CORRECCIÓN: Decidir qué normal usar basándose en su consistencia
+    // CORRECCIÓN: Decidir qué normal usar basándose en su consistencia
     vec3 finalNormal;
     
     // Verificar si la normal interpolada es consistente con la geométrica
@@ -115,13 +115,13 @@ void main() {
     /////////////////////////////////////////////////
 
     if(textureIndexBuffers.textureIndex[meshIndex] >=0){
-        rayPayload.color = colorBuffer.colors[meshIndex];
+        rayPayload.color = colorBuffer.colors[meshIndex].xyz;
         //rayPayload.color = vec3(1.0, 0.0, 1.0); 
         rayPayload.hit = true;
     }else{
 
 
-    int debugColor = 5;
+    int debugColor = 2;
 
 
     //Color a pasar
@@ -161,13 +161,13 @@ void main() {
     shadingFactor = max(0.0, shadingFactor);
 
     //Shading básico para el color base
-    baseColor = colorBuffer.colors[meshIndex]* (1-shadingFactor); 
+    baseColor = colorBuffer.colors[meshIndex].xyz * (shadingFactor); 
 
     break;
 
     case 3:
     //Color plano
-    baseColor = colorBuffer.colors[meshIndex];
+    baseColor = colorBuffer.colors[meshIndex].xyz;
     break;
 
     case 4: // Visualizar normales como colores RGB
@@ -177,6 +177,10 @@ void main() {
     
     case 5: // Visualizar normales como colores RGB
     baseColor = normalize((geometricNormal + 1.0) * 0.5); // Convertir de [-1,1] a [0,1]
+    break;
+
+    case 6:
+    baseColor = vec3(hitPosition.x/2.0,hitPosition.z/2,0);
     break;
 
     default:
@@ -203,7 +207,7 @@ void main() {
 
 
    // Si no hemos alcanzado la profundidad máxima, lanzar rayo de reflexión
-    if (rayPayload.depth < MAX_DEPTH && dot(incomingDirection, interpolatedNormal) > 0.0) {
+    if (rayPayload.depth < MAX_DEPTH) {
         // Calcular dirección de reflexión
         vec3 incomingDirection = gl_WorldRayDirectionEXT;
         vec3 reflectedDirection = reflect(incomingDirection, interpolatedNormal);

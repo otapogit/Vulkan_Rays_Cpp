@@ -25,7 +25,7 @@ namespace core{
 		glm::mat4 m_transMat = glm::mat4(1.0f);
 
 		//colorbuffer?
-		glm::vec3 color;
+		glm::vec4 color;
 
 		VkIndexType m_indexType = VK_INDEX_TYPE_UINT32;
 		int vertexcount = 0;

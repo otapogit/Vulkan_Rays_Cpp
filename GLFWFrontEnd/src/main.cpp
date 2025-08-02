@@ -279,11 +279,14 @@ int main(int argc, char* argv[]) {
     // Activar v-sync
     glfwSwapInterval(1);
 
+    std::cout << "Size of glm::vec3: " << sizeof(glm::vec3)<<std::endl;
+
     CreateCamera(glm::vec3(1.f, 0.f, 1.f));
     CameraGLFWController::setupCallbacks(window, m_pCamera);
 
     m_Renderer.init();
-    initGLTF();
+    //initGLTF();
+    initOBJ();
     //initRT();
     m_Renderer.setOutputResolution(m_windowwidth, m_windowheight);
     m_Renderer.save(false);
@@ -395,7 +398,7 @@ void initOBJ_l() {
     }
 
     uint32_t vanId = m_Renderer.defineMesh(vertices, normals, uvs, Loader.LoadedIndices);
-    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f, 0.f)), glm::vec3(1.0f), vanId);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.f, 0.f)), glm::vec3(1.0f), vanId);
 
     // 6. MALLA TRASERA (plano vertical al fondo)
     std::vector<Vertex> backMesh = {
@@ -419,7 +422,7 @@ void initOBJ() {
     // Cargar el archivo OBJ VW_Touran_2007
     //if (loader.loadOBJOptimized("../GLFWFrontEnd/OBJ/free_car_001.obj")) {
     if (loader.loadOBJ("../GLFWFrontEnd/OBJ/VW_Touran_2007.obj")) {
-        loader.analyzeVertexDuplication();
+        //loader.analyzeVertexDuplication();
         
         //loader.checkNormalConsistency();
         // Obtener los datos
@@ -433,8 +436,31 @@ void initOBJ() {
 
         uint32_t vanId = m_Renderer.defineMesh(vertices, normals, uvs, indices);
         m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f, 0.f)), glm::vec3(1.0f), vanId);
+        m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(6.0f, 0.f, 0.f)), glm::vec3(1.0f,0.5f,0.5f), vanId);
         // Mostrar estadísticas
         loader.printStats();
+
+        /*
+        loader.loadOBJ("../GLFWFrontEnd/OBJ/free_car_001.obj");
+        auto verticescar = loader.getVertices();
+        auto normalscar = loader.getNormals();
+        auto indicescar = loader.getIndices();
+        auto uvscar = loader.getTexCoords();*/
+
+        std::vector<Vertex> backMesh = {
+        Vertex({ 8.0f, -6.0f, -12.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}), // 0
+        Vertex({-8.0f, -6.0f, -12.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}), // 1
+        Vertex({-8.0f,  6.0f, -12.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}), // 2
+        Vertex({ 8.0f,  6.0f, -12.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f})  // 3
+        };
+        std::vector<uint32_t> backIndices = {
+            0, 1, 2,
+            0, 2, 3
+        };
+        uint32_t backMeshId = createMesh(backMesh, backIndices, &m_Renderer);
+
+        m_Renderer.addLight(glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(0.3f)),glm::vec3(-8.0f,0.0f,60.0f)), backMeshId, glm::vec3(1.0f, 0.0f, 1.0f), 1, 1);
+        m_Renderer.addLight(glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(0.3f)), glm::vec3(8.0f,0.0f,60.0f)), backMeshId, glm::vec3(1.0f, 1.0f, 0.0f), 0, 0);
 
     }
     else {
@@ -582,13 +608,13 @@ void initRT(){
     printf("Mesh Defined\n");
 
     m_Renderer.addLight(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), meshid, glm::vec3(1.0f,0.0f,0.0f),0,0);
-    //m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 0.f, 0.f)), glm::vec3(1.0f, 0.0f, 0.0f), meshid);
-    //m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.f, 0.f)), glm::vec3(1.0f,0.0f,0.0f), topMeshId);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 0.f, 0.f)), glm::vec3(1.0f, 0.0f, 0.0f), meshid);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.f, 0.f)), glm::vec3(1.0f,0.0f,0.0f), topMeshId);
     m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 0.f)), glm::vec3(1.0f,1.0f,1.0f), planeId);
-    //m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f,1.0f,1.0f), diagonalMeshId);
-    //m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f,1.0f,0.0f), frontMeshId);
-    //m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), rightMeshId);
-    //m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), leftMeshId);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f,1.0f,1.0f), diagonalMeshId);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f,1.0f,0.0f), frontMeshId);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), rightMeshId);
+    m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), leftMeshId);
 
     m_Renderer.setCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
     //m_Renderer.setCamera(glm::mat4(1.0f), glm::mat4(1.0f));
@@ -767,5 +793,17 @@ void CreateCamera(glm::vec3 pos, float FOV, float znear, float zfar) {
     glm::vec3 Up(0.0f, 1.0f, 0.0f);
 
     m_pCamera = new CameraFirstPerson(pos, Target, Up, FOV, m_windowwidth, m_windowheight, znear, zfar);
+
+    m_pCamera->SetCameraMode(CameraMode::Orbital);
+
+    // Establecer el punto alrededor del cual orbitar
+    m_pCamera->SetOrbitTarget(glm::vec3(0, 0, 0));
+
+    // Establecer distancia de órbita
+    m_pCamera->SetOrbitDistance(15.0f);
+
+    // Cambiar de vuelta a primera persona
+    m_pCamera->SetCameraMode(CameraMode::FirstPerson);
+
 }
 #pragma endregion

@@ -183,14 +183,18 @@ the scene with Renderer::addMesh
         }
         if (tid == -1) return false;
 
-        m_meshesDraw.push_back(meshesC[tid]);
+        core::SimpleMesh newMesh = meshesC[tid];
 
-        m_meshesDraw.back().m_transMat = modelMatrix;
+     
 
-        m_meshesDraw.back().color = glm::vec3(color);
+        newMesh.m_transMat = modelMatrix;
 
-        std::vector<glm::vec3> modelverts = {};
-        std::vector<glm::vec3> modelnorms = {};
+        newMesh.color = glm::vec4(color,1.0f);
+
+        m_meshesDraw.push_back(newMesh);
+
+        std::vector<glm::vec4> modelverts = {};
+        std::vector<glm::vec4> modelnorms = {};
 
         for (const glm::vec3& vert : m_meshesDraw.back().verts) {
             glm::vec4 homogeneousVert = glm::vec4(vert, 1.0f);
@@ -199,7 +203,7 @@ the scene with Renderer::addMesh
             glm::vec4 transformedVert = modelMatrix * homogeneousVert;
 
             // Convertir de vuelta a vec3 (xyz)
-            modelverts.push_back(glm::vec3(transformedVert));
+            modelverts.push_back(transformedVert);
         }
 
         for (const glm::vec3& norm : m_meshesDraw.back().norms) {
@@ -210,14 +214,15 @@ the scene with Renderer::addMesh
             glm::vec4 transformedNorm = modelMatrix * homogeneousNorm;
 
             // Convertir de vuelta a vec3 y normalizar
-            modelnorms.push_back(glm::normalize(glm::vec3(transformedNorm)));
+            modelnorms.push_back(glm::vec4(glm::normalize(glm::vec3(transformedNorm)),0.0f));
         }
 
         //meshesC[tid].
         m_meshesDraw.back().m_vertexBufferSize = sizeof(modelverts[0]) * modelverts.size();
         m_meshesDraw.back().m_vb = m_vkcore.CreateVertexBuffer(modelverts.data(), m_meshesDraw.back().m_vertexBufferSize, true);
 
-        m_meshesDraw.back().m_normalbuffer = m_vkcore.CreateNormalBuffer(modelnorms, true);
+        size_t normsize = sizeof(modelnorms[0]) * modelnorms.size();
+        m_meshesDraw.back().m_normalbuffer = m_vkcore.CreateVertexBuffer(modelnorms.data(), normsize, true);
      
         
         //m_meshesDraw contiene las meshes que se dibujarán
@@ -264,7 +269,48 @@ the scene with Renderer::addMesh
          if (mid == -1) return false;
          meshesC[mid].texIndex = tid;
 
-        return addMesh(modelMatrix, color, id);
+         core::SimpleMesh newMesh = meshesC[mid];
+
+         newMesh.m_transMat = modelMatrix;
+
+         newMesh.color = glm::vec4(color, 1.0f);
+
+         m_meshesDraw.push_back(newMesh);
+
+ 
+
+         std::vector<glm::vec4> modelverts = {};
+         std::vector<glm::vec4> modelnorms = {};
+
+         for (const glm::vec3& vert : m_meshesDraw.back().verts) {
+             glm::vec4 homogeneousVert = glm::vec4(vert, 1.0f);
+
+             // Multiplicar por la matriz de transformación
+             glm::vec4 transformedVert = modelMatrix * homogeneousVert;
+
+             // Convertir de vuelta a vec3 (xyz)
+             modelverts.push_back(transformedVert);
+         }
+
+         for (const glm::vec3& norm : m_meshesDraw.back().norms) {
+             // Para normales usamos w=0.0f porque no queremos que se vean afectadas por la traslación
+             glm::vec4 homogeneousNorm = glm::vec4(norm, 0.0f);
+
+             // Multiplicar por la matriz de transformación
+             glm::vec4 transformedNorm = modelMatrix * homogeneousNorm;
+
+             // Convertir de vuelta a vec3 y normalizar
+             modelnorms.push_back(glm::vec4(glm::normalize(glm::vec3(transformedNorm)), 0.0f));
+         }
+
+         //meshesC[tid].
+         m_meshesDraw.back().m_vertexBufferSize = sizeof(modelverts[0]) * modelverts.size();
+         m_meshesDraw.back().m_vb = m_vkcore.CreateVertexBuffer(modelverts.data(), m_meshesDraw.back().m_vertexBufferSize, true);
+
+         size_t normsize = sizeof(modelnorms[0]) * modelnorms.size();
+         m_meshesDraw.back().m_normalbuffer = m_vkcore.CreateVertexBuffer(modelnorms.data(), normsize, true);
+
+        return true;
 
 
     }

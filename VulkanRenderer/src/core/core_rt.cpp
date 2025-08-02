@@ -60,7 +60,7 @@ namespace core {
         VkAccelerationStructureGeometryTrianglesDataKHR triangles{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR };
         triangles.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;  // vec3 vertex position data.
         triangles.vertexData.deviceAddress = vertexAddress;
-        triangles.vertexStride = sizeof(glm::vec3);
+        triangles.vertexStride = sizeof(glm::vec4);
         // Describe index data (32-bit unsigned int)
         triangles.indexType = VK_INDEX_TYPE_UINT32;
         triangles.indexData.deviceAddress = indexAddress;
@@ -106,7 +106,7 @@ namespace core {
             //Da error aqui
             auto blas = objectToVkGeometryKHR(obj);
             allBlas.emplace_back(blas);
-            colors.push_back(glm::vec3(obj.color.r,obj.color.g,obj.color.g));
+            colors.push_back(glm::vec4(obj.color.r,obj.color.g,obj.color.g,1.0f));
             printf("color en createBLAS: %f %f %f\n", obj.color.r, obj.color.g, obj.color.b);
         }
 
@@ -862,15 +862,20 @@ namespace core {
 
         }
 
+        colors.clear();
+        for (const auto& mesh : meshes) {
+            colors.push_back(mesh.color);
+        }
 
-        if (colors.empty()) {
-            //printf("Colors was empty\n");
+        for (size_t i = 0; i < colors.size(); ++i) {
+            std::cout << "Color[" << i << "] = "
+                << colors[i].r << ", "
+                << colors[i].g << ", "
+                << colors[i].b << "\n";
         }
-        else {
-            for (glm::vec3 waht : colors) {
-                //printf("Color: %d %d %d \n", waht.r, waht.g, waht.b);
-            }
-        }
+
+
+
 
         m_textureIndexBuffer = m_vkcore->CreateBufferBlas(sizeof(int) * texindexes.size(), 
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
@@ -883,14 +888,14 @@ namespace core {
         vkUnmapMemory(*m_device, m_textureIndexBuffer.m_mem);
 
 
-        m_colorBuffer = m_vkcore->CreateBufferBlas(sizeof(glm::vec3) * colors.size(),
+        m_colorBuffer = m_vkcore->CreateBufferBlas(sizeof(glm::vec4) * colors.size(),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
         // Mapear y escribir el color
         void* colorData;
-        vkMapMemory(*m_device, m_colorBuffer.m_mem, 0, sizeof(glm::vec3) * colors.size(), 0, &colorData);
-        memcpy(colorData, colors.data(), sizeof(glm::vec3) * colors.size());
+        vkMapMemory(*m_device, m_colorBuffer.m_mem, 0, sizeof(glm::vec4) * colors.size(), 0, &colorData);
+        memcpy(colorData, colors.data(), sizeof(glm::vec4) * colors.size());
         vkUnmapMemory(*m_device, m_colorBuffer.m_mem);
 
     }
@@ -1065,11 +1070,6 @@ namespace core {
             exit(1);
         }
 
-        //colors.clear();
-        for (glm::vec3& color: colors) {
-            //colors.push_back(glm::vec3(mesh.color.r, mesh.color.g, mesh.color.b));
-            printf("Pushed Back color: %d %d %d\n", color.r, color.g, color.b);
-        }
 
         CreateGeometryBuffers(meshes);
         WriteGeometryDescriptorSet();

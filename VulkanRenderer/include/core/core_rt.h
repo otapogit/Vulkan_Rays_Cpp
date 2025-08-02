@@ -223,7 +223,7 @@ namespace core {
 
 		int m_maxsize = 10;
 
-		std::vector<glm::vec3> colors = {};
+		std::vector<glm::vec4> colors = {};
 
 		VkPipeline m_rtPipeline = VK_NULL_HANDLE;
 		VkPipelineLayout m_rtPipelineLayout = VK_NULL_HANDLE;

@@ -1,4 +1,4 @@
-#include "core_fpcamera.h"
+Ôªø#include "core_fpcamera.h"
 #include <GLFW/glfw3.h>
 bool CameraFirstPerson::GLFWCameraHandler(CameraMovement& movement, int Key, int Action, int Mods) {
 
@@ -33,6 +33,49 @@ bool CameraFirstPerson::GLFWCameraHandler(CameraMovement& movement, int Key, int
 	return Handled;
 }
 
+// Implementaci√≥n del handler de mouse
+bool CameraFirstPerson::GLFWMouseButtonHandler(int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+        if (action == GLFW_PRESS) {
+            // Cambiar a modo orbital
+            m_cameraMode = CameraMode::Orbital;
+
+            // Calcular el target orbital basado en la direcci√≥n actual de la c√°mara
+            glm::vec3 forward = glm::mat3_cast(m_cameraOrientation) * glm::vec3(0, 0, -1);
+            m_orbitTarget = m_cameraPos + forward * m_orbitDistance;
+
+            // Calcular √°ngulos iniciales de √≥rbita
+            glm::vec3 toCamera = m_cameraPos - m_orbitTarget;
+            m_orbitDistance = glm::length(toCamera);
+
+            if (m_orbitDistance > 0.0f) {
+                toCamera = glm::normalize(toCamera);
+                m_orbitYaw = atan2(toCamera.x, toCamera.z);
+                m_orbitPitch = asin(toCamera.y);
+            }
+
+            m_mouseState.m_buttonPressed = true;
+        }
+        else if (action == GLFW_RELEASE) {
+            m_mouseState.m_buttonPressed = false;
+        }
+        return true;
+    }
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS) {
+            // Cambiar a modo primera persona
+            m_cameraMode = CameraMode::FirstPerson;
+            m_mouseState.m_buttonPressed = true;
+        }
+        else if (action == GLFW_RELEASE) {
+            m_mouseState.m_buttonPressed = false;
+        }
+        return true;
+    }
+
+    return false;
+}
 
 CameraFirstPerson::CameraFirstPerson(const glm::vec3& Pos, const glm::vec3& Target,
     const glm::vec3& Up, float FOV, float width, float height, float znear, float zfar) {
@@ -43,12 +86,12 @@ CameraFirstPerson::CameraFirstPerson(const glm::vec3& Pos, const glm::vec3& Targ
     // FIX 1: Convertir FOV a radianes
     m_projection = glm::perspective(glm::radians(FOV), ar, znear, zfar);
 
-    // FIX 2: Calcular quaternion de orientaciÛn correctamente
+    // FIX 2: Calcular quaternion de orientaci√≥n correctamente
     glm::vec3 direction = glm::normalize(Target - Pos);
     glm::vec3 right = glm::normalize(glm::cross(direction, Up));
     glm::vec3 up = glm::normalize(glm::cross(right, direction));
 
-    // Crear matriz de rotaciÛn y convertir a quaternion
+    // Crear matriz de rotaci√≥n y convertir a quaternion
     glm::mat3 rotationMatrix;
     rotationMatrix[0] = right;
     rotationMatrix[1] = up;
@@ -59,7 +102,7 @@ CameraFirstPerson::CameraFirstPerson(const glm::vec3& Pos, const glm::vec3& Targ
 
 /*
 glm::mat4 CameraFirstPerson::GetViewMatrix() const {
-    // FIX 3: Usar la funciÛn lookAt directamente es m·s confiable
+    // FIX 3: Usar la funci√≥n lookAt directamente es m√°s confiable
     glm::vec3 forward = glm::normalize(glm::mat3_cast(m_cameraOrientation) * glm::vec3(0, 0, -1));
     glm::vec3 target = m_cameraPos + forward;
     return glm::lookAt(m_cameraPos, target, m_up);
@@ -81,9 +124,15 @@ void CameraFirstPerson::Update(float dt) {
         CalcCameraOrientation();
     }
     m_oldMousePos = m_mouseState.m_pos;
-    CalcVelocity(dt);
-    m_cameraPos += m_velocity * dt;
+
+    // Solo aplicar movimiento de velocidad en modo primera persona
+    if (m_cameraMode == CameraMode::FirstPerson) {
+        CalcVelocity(dt);
+        m_cameraPos += m_velocity * dt;
+    }
+    // En modo orbital, la posici√≥n se calcula en UpdateOrbitalCamera()
 }
+
 
 void CameraFirstPerson::CalcVelocity(float dt) {
     glm::vec3 Acceleration = CalcAcceleration();
@@ -100,7 +149,7 @@ void CameraFirstPerson::CalcVelocity(float dt) {
 }
 
 glm::vec3 CameraFirstPerson::CalcAcceleration() {
-    // FIX 4: Obtener vectores de direcciÛn correctamente
+    // FIX 4: Obtener vectores de direcci√≥n correctamente
     glm::mat3 rotMat = glm::mat3_cast(m_cameraOrientation);
     glm::vec3 right = rotMat[0];
     glm::vec3 up = rotMat[1];
@@ -132,77 +181,135 @@ glm::vec3 CameraFirstPerson::CalcAcceleration() {
 void CameraFirstPerson::CalcCameraOrientation() {
     glm::vec2 DeltaMouse = m_mouseState.m_pos - m_oldMousePos;
 
-    // Sensibilidad del mouse reducida y configurable
-    float baseSensitivity = 0.001f; // Sensibilidad base muy baja
-    float sensitivity = m_mouseSpeed * baseSensitivity;
+    if (glm::length(DeltaMouse) < 0.01f) return;
 
-    // Opcional: Aplicar un factor de suavizado adicional
-    float smoothingFactor = 0.5f; // Valor entre 0.1 y 1.0
+    float baseSensitivity = 0.001f;
+    float sensitivity = m_mouseSpeed * baseSensitivity;
+    float smoothingFactor = 0.5f;
     sensitivity *= smoothingFactor;
 
-    // Calcular los ·ngulos de rotaciÛn
-    float yawDelta = -DeltaMouse.x * sensitivity;   // RotaciÛn horizontal (Y axis)
-    float pitchDelta = -DeltaMouse.y * sensitivity; // RotaciÛn vertical (X axis)
+    if (m_cameraMode == CameraMode::FirstPerson) {
+        // C√≥digo original para primera persona
+        float yawDelta = -DeltaMouse.x * sensitivity;
+        float pitchDelta = -DeltaMouse.y * sensitivity;
 
-    // Limitar la velocidad m·xima de rotaciÛn por frame
-    float maxRotation = glm::radians(5.0f); // M·ximo 5 grados por frame
-    yawDelta = glm::clamp(yawDelta, -maxRotation, maxRotation);
-    pitchDelta = glm::clamp(pitchDelta, -maxRotation, maxRotation);
+        float maxRotation = glm::radians(5.0f);
+        yawDelta = glm::clamp(yawDelta, -maxRotation, maxRotation);
+        pitchDelta = glm::clamp(pitchDelta, -maxRotation, maxRotation);
 
-    // Solo rotar si hay movimiento significativo del mouse
-    if (glm::length(DeltaMouse) > 0.01f) {
-        // Obtener el eje derecho (right) de la c·mara para el pitch
         glm::mat3 rotMatrix = glm::mat3_cast(m_cameraOrientation);
-        glm::vec3 rightAxis = rotMatrix[0];  // Eje derecho de la c·mara
+        glm::vec3 rightAxis = rotMatrix[0];
 
-        // Yaw: rotaciÛn alrededor del eje Y mundial (arriba)
         glm::quat yawQuat = glm::angleAxis(yawDelta, glm::vec3(0, 1, 0));
-
-        // Pitch: rotaciÛn alrededor del eje derecho (right) de la c·mara
         glm::quat pitchQuat = glm::angleAxis(pitchDelta, rightAxis);
 
-        // Aplicar rotaciones en el orden correcto
-        // 1. Primero aplicar yaw (rotaciÛn mundial)
         m_cameraOrientation = yawQuat * m_cameraOrientation;
-
-        // 2. Luego aplicar pitch (rotaciÛn local)
         m_cameraOrientation = m_cameraOrientation * pitchQuat;
-
-        // Normalizar para evitar acumulaciÛn de errores
         m_cameraOrientation = glm::normalize(m_cameraOrientation);
+
+    }
+    else if (m_cameraMode == CameraMode::Orbital) {
+        // Modo orbital
+        float yawDelta = -DeltaMouse.x * sensitivity * 9.0f;   // M√°s sensible para √≥rbita
+        float pitchDelta = -DeltaMouse.y * sensitivity * 9.0f;
+
+        m_orbitYaw += yawDelta;
+        m_orbitPitch += pitchDelta;
+
+        // Limitar el pitch para evitar que la c√°mara se voltee
+        float maxPitch = glm::radians(89.0f);
+        m_orbitPitch = glm::clamp(m_orbitPitch, -maxPitch, maxPitch);
+
+        UpdateOrbitalCamera();
+    }
+}
+
+
+
+void CameraFirstPerson::UpdateOrbitalCamera() {
+    // Usar coordenadas esf√©ricas completas para permitir rotaci√≥n completa
+    float cosYaw = cos(m_orbitYaw);
+    float sinYaw = sin(m_orbitYaw);
+    float cosPitch = cos(m_orbitPitch);
+    float sinPitch = sin(m_orbitPitch);
+
+    // Calcular posici√≥n usando coordenadas esf√©ricas est√°ndar
+    // Con pitch que va de -œÄ/2 a œÄ/2 y yaw que va de 0 a 2œÄ
+    glm::vec3 offset;
+    offset.x = m_orbitDistance * cosPitch * sinYaw;
+    offset.y = m_orbitDistance * sinPitch;
+    offset.z = m_orbitDistance * cosPitch * cosYaw;
+
+    m_cameraPos = m_orbitTarget + offset;
+
+    // Calcular la orientaci√≥n para mirar hacia el target
+    glm::vec3 direction = glm::normalize(m_orbitTarget - m_cameraPos);
+
+    // Para el vector up, necesitamos manejarlo de manera especial para evitar gimbal lock
+    glm::vec3 worldUp = glm::vec3(0, 1, 0);
+    glm::vec3 right;
+    glm::vec3 up;
+
+    // Si estamos muy cerca de mirar directamente hacia arriba o abajo,
+    // usar un vector de referencia diferente para evitar gimbal lock
+    if (abs(glm::dot(direction, worldUp)) > 0.99f) {
+        // Usar el eje Z como referencia cuando miramos casi verticalmente
+        glm::vec3 tempRef = glm::vec3(0, 0, 1);
+        right = glm::normalize(glm::cross(tempRef, direction));
+        up = glm::normalize(glm::cross(direction, right));
+    }
+    else {
+        // Comportamiento normal
+        right = glm::normalize(glm::cross(worldUp, direction));
+        up = glm::normalize(glm::cross(direction, right));
     }
 
-    // Opcional: Limitar el pitch para evitar que la c·mara se voltee completamente
-    // Puedes descomentar esto si quieres limitar la rotaciÛn vertical
-    /*
-    glm::vec3 forward = glm::mat3_cast(m_cameraOrientation) * glm::vec3(0, 0, -1);
-    float currentPitch = asin(-forward.y);
-    float maxPitch = glm::radians(89.0f); // Limitar a 89 grados
+    // Crear matriz de rotaci√≥n y convertir a quaternion
+    glm::mat3 rotationMatrix;
+    rotationMatrix[0] = right;
+    rotationMatrix[1] = up;
+    rotationMatrix[2] = -direction;
 
-    if (currentPitch > maxPitch || currentPitch < -maxPitch) {
-        // Recalcular sin el exceso de pitch
-        glm::vec3 right = glm::mat3_cast(m_cameraOrientation) * glm::vec3(1, 0, 0);
-        glm::vec3 up = glm::vec3(0, 1, 0);
-        forward = glm::normalize(glm::cross(up, right));
-        forward.y = glm::clamp(forward.y, -sin(maxPitch), sin(maxPitch));
-        forward = glm::normalize(forward);
+    m_cameraOrientation = glm::quat_cast(rotationMatrix);
+}
 
-        right = glm::normalize(glm::cross(forward, up));
-        up = glm::cross(right, forward);
-
-        glm::mat3 rotMatrix;
-        rotMatrix[0] = right;
-        rotMatrix[1] = up;
-        rotMatrix[2] = -forward;
-
-        m_cameraOrientation = glm::quat_cast(rotMatrix);
+void CameraFirstPerson::SetOrbitTarget(const glm::vec3& target) {
+    m_orbitTarget = target;
+    if (m_cameraMode == CameraMode::Orbital) {
+        UpdateOrbitalCamera();
     }
-    */
+}
+void CameraFirstPerson::SetOrbitDistance(float distance) {
+    m_orbitDistance = distance;
+    if (m_cameraMode == CameraMode::Orbital) {
+        UpdateOrbitalCamera();
+    }
+}
+
+void CameraFirstPerson::SetCameraMode(CameraMode mode) {
+    if (m_cameraMode != mode) {
+        m_cameraMode = mode;
+        if (mode == CameraMode::Orbital) {
+            // Configurar par√°metros iniciales del modo orbital
+            glm::vec3 forward = glm::mat3_cast(m_cameraOrientation) * glm::vec3(0, 0, -1);
+            m_orbitTarget = m_cameraPos + forward * m_orbitDistance;
+            UpdateOrbitalCamera();
+        }
+    }
+}
+
+void CameraFirstPerson::GLFWScrollHandler(double xoffset, double yoffset) {
+    if (m_cameraMode == CameraMode::Orbital) {
+        float zoomSpeed = 1.0f;
+        m_orbitDistance -= yoffset * zoomSpeed;
+        m_orbitDistance = glm::clamp(m_orbitDistance, 0.5f, 100.0f); // Limitar distancia
+        UpdateOrbitalCamera();
+    }
 }
 
 void CameraFirstPerson::SetUpVector() {
     // FIX 6: Simplificar - mantener el up vector original
-    // Esta funciÛn causaba problemas, mejor no recalcular constantemente
+    // Esta funci√≥n causaba problemas, mejor no recalcular constantemente
 }
 
 
