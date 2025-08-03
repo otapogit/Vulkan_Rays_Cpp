@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include "OBJloader.cpp"
 #include "OBJ_Loader.h"
+#include "OBJloader.cpp"
 
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
@@ -13,7 +13,7 @@
 #endif
 #include <Renderer/VulkanRenderer.h>
 #include "core_fpcamera.h"
-//#include "PGUPV.h"
+
 #include <windows.h>
 
 #include <GL/gl.h>
@@ -25,14 +25,16 @@
 
 #include <3rdParty/stb_image_write.h>
 
-//using namespace PGUPV;
-
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
 
 #include "3rdParty/stb_image.h"
 #include "glfwcamera.h"
 
+
+//Número de prueba a usar del 1 al 4
+#define PRUEBA 2
+#pragma region setup
 // Función para manejar errores de GLFW
 void error_callback(int error, const char* description) {
     fprintf(stderr, "Error: %s (%d)\n", description, error);
@@ -210,6 +212,320 @@ VulkanRenderer m_Renderer;
 int m_windowwidth, m_windowheight;
 CameraFirstPerson* m_pCamera;
 
+#pragma endregion
+
+
+#pragma region Pruebas
+
+
+/*
+    VEHICULOS A PROBAR
+
+    Coche low poly:             free_car_001
+    Volkswagen touran:          VW_Touran_2007
+    Tesla:                      Tesla
+    Chevrolet Camaro:           1969_Chevrolet_Camaro_Publish
+*/
+
+void Prueba1(VulkanRenderer* m_Renderer) {
+
+    OBJLoader loader;
+
+    /*
+        Cargar primero el modelo de la Volkswagen touran
+    */
+
+
+    loader.loadOBJ("../GLFWFrontEnd/OBJ/VW_Touran_2007.obj");
+
+    auto vertices = loader.getVertices();
+    auto normals = loader.getNormals();
+    auto indices = loader.getIndices();
+    auto uvs = loader.getTexCoords();
+
+    uint32_t vanId = m_Renderer->defineMesh(vertices, normals, uvs, indices);
+    m_Renderer->addMesh(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f, 0.f)),glm::radians(180.f),glm::vec3(1.f,0.f,0.f)), glm::vec3(1.0f), vanId);
+
+
+    /*
+    Cargar Luz rectangular
+    */
+
+    std::vector<Vertex> backMesh = {
+    Vertex({ 8.0f, -6.0f, -12.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}), // 0
+    Vertex({-8.0f, -6.0f, -12.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}), // 1
+    Vertex({-8.0f,  6.0f, -12.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}), // 2
+    Vertex({ 8.0f,  6.0f, -12.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f})  // 3
+    };
+    std::vector<uint32_t> backIndices = {
+        0, 1, 2,
+        0, 2, 3
+    };
+    uint32_t backMeshId = createMesh(backMesh, backIndices, m_Renderer);
+
+    m_Renderer->addLight(
+        glm::translate(
+            glm::rotate(
+                glm::scale(glm::mat4(1.f), glm::vec3(0.1f,0.02f,0.1f))
+                , glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+            , glm::vec3(0.0f, -50.0f, -25.0f)), backMeshId, glm::vec3(0.0f, 1.0f, 0.0f), 1, 1);
+    m_Renderer->addLight(
+        glm::translate(
+            glm::rotate(
+                glm::scale(glm::mat4(1.f), glm::vec3(0.1f, 0.02f, 0.1f))
+                , glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+            , glm::vec3(0.0f, -40.0f, -25.0f)), backMeshId, glm::vec3(1.0f, 0.0f, 0.0f), 1, 1);
+    m_Renderer->addLight(
+        glm::translate(
+            glm::rotate(
+                glm::scale(glm::mat4(1.f), glm::vec3(0.1f, 0.02f, 0.1f))
+                , glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+            , glm::vec3(0.0f, -60.0f, -25.0f)), backMeshId, glm::vec3(1.0f, 1.0f, 1.0f), 1, 1);
+
+}
+void Prueba2(VulkanRenderer* m_Renderer) {
+
+    OBJLoader loader;
+
+    /*
+        Cargar primero el modelo del tesla
+    */
+
+
+    loader.loadOBJ("../GLFWFrontEnd/OBJ/Tesla.obj");
+
+    auto vertices = loader.getVertices();
+    auto normals = loader.getNormals();
+    auto indices = loader.getIndices();
+    auto uvs = loader.getTexCoords();
+
+    uint32_t vanId = m_Renderer->defineMesh(vertices, normals, uvs, indices);
+    m_Renderer->addMesh(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 01.f, 0.f)), glm::radians(180.f), glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1.0f), vanId);
+
+
+    /*
+    Cargar arco Luz cubo
+    */
+    
+    loader.loadOBJ("../GLFWFrontEnd/OBJ/Cubo.obj");
+
+    vertices = loader.getVertices();
+    normals = loader.getNormals();
+    indices = loader.getIndices();
+    uvs = loader.getTexCoords();
+
+    uint32_t luightId = m_Renderer->defineMesh(vertices, normals, uvs, indices);
+    m_Renderer->addLight(glm::scale(
+            glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.f, 0.f))
+        , glm::vec3(0.6f)), 
+        luightId, glm::vec3(1.0f,0.0f,0.0f),0,0);
+
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(7.50f, -07.5f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(0.0f, 1.0f, 0.0f), 0, 0);
+
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -10.f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(0.0f, 0.0f, 1.0f), 0, 0);
+
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(-7.50f, -7.5f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(0.70f, 0.70f, 0.0f), 0, 0);
+
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, 0.f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(0.0f, 0.70f, 0.70f), 0, 0);
+
+
+
+}
+void Prueba3(VulkanRenderer* m_Renderer) {
+
+    OBJLoader loader;
+
+    /*
+        Cargar primero el modelo de la Volkswagen touran
+    */
+
+
+    loader.loadOBJ("../GLFWFrontEnd/OBJ/VW_Touran_2007.obj");
+
+    auto vertices = loader.getVertices();
+    auto normals = loader.getNormals();
+    auto indices = loader.getIndices();
+    auto uvs = loader.getTexCoords();
+
+    uint32_t vanId = m_Renderer->defineMesh(vertices, normals, uvs, indices);
+    m_Renderer->addMesh(
+        glm::scale(
+            glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 01.f, 0.f)), glm::radians(180.f), glm::vec3(1.f, 0.f, 0.f)),
+            glm::vec3(1.25f)),
+        glm::vec3(1.0f), vanId);
+
+
+    /*
+     Cargar arco Luz cubo
+     */
+
+    loader.loadOBJ("../GLFWFrontEnd/OBJ/Cubo.obj");
+
+    vertices = loader.getVertices();
+    normals = loader.getNormals();
+    indices = loader.getIndices();
+    uvs = loader.getTexCoords();
+
+    uint32_t luightId = m_Renderer->defineMesh(vertices, normals, uvs, indices);
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(1.0f, 0.0f, 0.0f), 0, 0);
+
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(7.50f, -07.5f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(0.0f, 1.0f, 0.0f), 0, 0);
+
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -10.f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(0.0f, 0.0f, 1.0f), 0, 0);
+
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(-7.50f, -7.5f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(0.70f, 0.70f, 0.0f), 0, 0);
+
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, 0.f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(0.0f, 0.70f, 0.70f), 0, 0);
+
+}
+void Prueba4(VulkanRenderer* m_Renderer) {
+
+    OBJLoader loader;
+
+    /*
+        Cargar primero el modelo de la Volkswagen touran
+    */
+
+
+    loader.loadOBJ("../GLFWFrontEnd/OBJ/1969_Chevrolet_Camaro_Publish.obj");
+
+    auto vertices = loader.getVertices();
+    auto normals = loader.getNormals();
+    auto indices = loader.getIndices();
+    auto uvs = loader.getTexCoords();
+
+    uint32_t vanId = m_Renderer->defineMesh(vertices, normals, uvs, indices);
+    m_Renderer->addMesh(
+        glm::scale(
+            glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 01.f, 0.f)), glm::radians(180.f), glm::vec3(1.f, 0.f, 0.f)),
+        glm::vec3(1.25f)),
+        glm::vec3(1.0f), vanId);
+
+
+    /*
+    Cargar arco Luz cubo
+    */
+
+    loader.loadOBJ("../GLFWFrontEnd/OBJ/Cubo.obj");
+
+    vertices = loader.getVertices();
+    normals = loader.getNormals();
+    indices = loader.getIndices();
+    uvs = loader.getTexCoords();
+
+    uint32_t luightId = m_Renderer->defineMesh(vertices, normals, uvs, indices);
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(1.0f, 0.0f, 0.0f), 0, 0);
+
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(7.50f, -07.5f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(0.0f, 1.0f, 0.0f), 0, 0);
+
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -10.f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(0.0f, 0.0f, 1.0f), 0, 0);
+
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(-7.50f, -7.5f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(0.70f, 0.70f, 0.0f), 0, 0);
+
+    m_Renderer->addLight(glm::scale(
+        glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, 0.f, 0.f))
+        , glm::vec3(0.6f)),
+        luightId, glm::vec3(0.0f, 0.70f, 0.70f), 0, 0);
+
+}
+void PruebaBaseline(VulkanRenderer* m_Renderer) {
+
+    OBJLoader loader;
+
+    /*
+        Cargar primero el modelo de la Volkswagen touran
+    */
+
+
+    loader.loadOBJ("../GLFWFrontEnd/OBJ/free_car_001.obj");
+
+    auto vertices = loader.getVertices();
+    auto normals = loader.getNormals();
+    auto indices = loader.getIndices();
+    auto uvs = loader.getTexCoords();
+
+    uint32_t vanId = m_Renderer->defineMesh(vertices, normals, uvs, indices);
+    m_Renderer->addMesh(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f, 0.f)), glm::radians(180.f), glm::vec3(1.f, 0.f, 0.f)), glm::vec3(1.0f), vanId);
+
+
+    /*
+    Cargar Luz rectangular
+    */
+
+    std::vector<Vertex> backMesh = {
+    Vertex({ 8.0f, -6.0f, -12.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}), // 0
+    Vertex({-8.0f, -6.0f, -12.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}), // 1
+    Vertex({-8.0f,  6.0f, -12.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}), // 2
+    Vertex({ 8.0f,  6.0f, -12.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f})  // 3
+    };
+    std::vector<uint32_t> backIndices = {
+        0, 1, 2,
+        0, 2, 3
+    };
+    uint32_t backMeshId = createMesh(backMesh, backIndices, m_Renderer);
+
+    m_Renderer->addLight(
+        glm::translate(
+            glm::rotate(
+                glm::scale(glm::mat4(1.f), glm::vec3(0.1f, 0.02f, 0.1f))
+                , glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+            , glm::vec3(0.0f, -50.0f, -25.0f)), backMeshId, glm::vec3(0.0f, 1.0f, 0.0f), 1, 1);
+    m_Renderer->addLight(
+        glm::translate(
+            glm::rotate(
+                glm::scale(glm::mat4(1.f), glm::vec3(0.1f, 0.02f, 0.1f))
+                , glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+            , glm::vec3(0.0f, -40.0f, -25.0f)), backMeshId, glm::vec3(1.0f, 0.0f, 0.0f), 1, 1);
+    m_Renderer->addLight(
+        glm::translate(
+            glm::rotate(
+                glm::scale(glm::mat4(1.f), glm::vec3(0.1f, 0.02f, 0.1f))
+                , glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+            , glm::vec3(0.0f, -60.0f, -25.0f)), backMeshId, glm::vec3(1.0f, 1.0f, 1.0f), 1, 1);
+}
+
+#pragma endregion
+
+
 int main(int argc, char* argv[]) {
 
 
@@ -245,36 +561,6 @@ int main(int argc, char* argv[]) {
     // Hacer la ventana actual
     glfwMakeContextCurrent(window);
 
-    /*
-    glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK) {
-        std::cerr << "Error: No se pudo inicializar GLEW" << std::endl;
-        glfwTerminate();
-        return -4;
-    }*/
-    bool hasMemoryObject = false;
-    bool hasMemoryObjectWin32 = false;
-    bool hasSemaphore = false;
-    bool hasSemaphoreWin32 = false;
-    
-    /*
-    GLint nExtensions;
-    glGetIntegerv(GL_NUM_EXTENSIONS, &nExtensions);
-
-    for (GLint i = 0; i < nExtensions; ++i) {
-        const char* ext = (const char*)glGetStringi(GL_EXTENSIONS, i);
-        if (strcmp(ext, "GL_EXT_memory_object") == 0) hasMemoryObject = true;
-        if (strcmp(ext, "GL_EXT_memory_object_win32") == 0) hasMemoryObjectWin32 = true;
-        if (strcmp(ext, "GL_EXT_semaphore") == 0) hasSemaphore = true;
-        if (strcmp(ext, "GL_EXT_semaphore_win32") == 0) hasSemaphoreWin32 = true;
-    }
-
-    if (hasMemoryObject && hasMemoryObjectWin32 && hasSemaphore && hasSemaphoreWin32) {
-        std::cout << "Interoperabilidad Vulkan-OpenGL soportada (aunque no reporten GL_EXT_external_objects directamente)\n";
-    }
-    else {
-        std::cerr << "Faltan extensiones para interoperabilidad Vulkan-OpenGL\n";
-    }*/
 
     // Activar v-sync
     glfwSwapInterval(1);
@@ -285,9 +571,27 @@ int main(int argc, char* argv[]) {
     CameraGLFWController::setupCallbacks(window, m_pCamera);
 
     m_Renderer.init();
-    //initGLTF();
-    initOBJ();
-    //initRT();
+
+    int prueba = PRUEBA;
+
+    switch (prueba) {
+    case 1:
+        Prueba1(&m_Renderer);
+        break;
+    case 2:
+        Prueba2(&m_Renderer);
+        break;
+    case 3:
+        Prueba3(&m_Renderer);
+        break;
+    case 4:
+        Prueba4(&m_Renderer);
+        break;
+    default:
+        PruebaBaseline(&m_Renderer);
+        break;
+    }
+
     m_Renderer.setOutputResolution(m_windowwidth, m_windowheight);
     m_Renderer.save(false);
     m_Renderer.render();
@@ -348,6 +652,10 @@ int main(int argc, char* argv[]) {
         // Cerrar con ESC
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+            printf("Time since last frame: %.4f\n", deltaTime);
         }
 
         // Limpiar pantalla
@@ -416,59 +724,7 @@ void initOBJ_l() {
     m_Renderer.addLight(glm::mat4(1.f), backMeshId, glm::vec3(1.0f, 0.0f, 1.0f), 1, 1);
 }
 
-void initOBJ() {
 
-    OBJLoader loader;
-    // Cargar el archivo OBJ VW_Touran_2007
-    //if (loader.loadOBJOptimized("../GLFWFrontEnd/OBJ/free_car_001.obj")) {
-    if (loader.loadOBJ("../GLFWFrontEnd/OBJ/VW_Touran_2007.obj")) {
-        //loader.analyzeVertexDuplication();
-        
-        //loader.checkNormalConsistency();
-        // Obtener los datos
-        auto vertices = loader.getVertices();
-        auto normals = loader.getNormals();
-        auto indices = loader.getIndices();
-        std::vector<glm::vec2> uvs = {glm::vec2(1.0f)};
-
-        // Datos entrelazados (vértice + normal)
-        //auto interleavedData = loader.getInterleavedData();
-
-        uint32_t vanId = m_Renderer.defineMesh(vertices, normals, uvs, indices);
-        m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f, 0.f)), glm::vec3(1.0f), vanId);
-        m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(6.0f, 0.f, 0.f)), glm::vec3(1.0f,0.5f,0.5f), vanId);
-        // Mostrar estadísticas
-        loader.printStats();
-
-        /*
-        loader.loadOBJ("../GLFWFrontEnd/OBJ/free_car_001.obj");
-        auto verticescar = loader.getVertices();
-        auto normalscar = loader.getNormals();
-        auto indicescar = loader.getIndices();
-        auto uvscar = loader.getTexCoords();*/
-
-        std::vector<Vertex> backMesh = {
-        Vertex({ 8.0f, -6.0f, -12.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}), // 0
-        Vertex({-8.0f, -6.0f, -12.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}), // 1
-        Vertex({-8.0f,  6.0f, -12.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}), // 2
-        Vertex({ 8.0f,  6.0f, -12.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f})  // 3
-        };
-        std::vector<uint32_t> backIndices = {
-            0, 1, 2,
-            0, 2, 3
-        };
-        uint32_t backMeshId = createMesh(backMesh, backIndices, &m_Renderer);
-
-        m_Renderer.addLight(glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(0.3f)),glm::vec3(-8.0f,0.0f,60.0f)), backMeshId, glm::vec3(1.0f, 0.0f, 1.0f), 1, 1);
-        m_Renderer.addLight(glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(0.3f)), glm::vec3(8.0f,0.0f,60.0f)), backMeshId, glm::vec3(1.0f, 1.0f, 0.0f), 0, 0);
-
-    }
-    else {
-        std::cerr << "Error al cargar el archivo OBJ" << std::endl;
-        exit(1);
-    }
-
-}
 
 void initRT(){
     
@@ -807,3 +1063,5 @@ void CreateCamera(glm::vec3 pos, float FOV, float znear, float zfar) {
 
 }
 #pragma endregion
+
+
