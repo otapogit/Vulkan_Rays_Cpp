@@ -52,7 +52,7 @@ public:
         std::cout << "Indices: " << indices.size() << std::endl;
         std::cout << "Triángulos: " << indices.size() / 3 << std::endl;
 
-        validateNormals();
+        //validateNormals();
 
         return true;
     }

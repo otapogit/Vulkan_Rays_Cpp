@@ -33,7 +33,7 @@
 
 
 //Número de prueba a usar del 1 al 4
-#define PRUEBA 2
+#define PRUEBA 4
 #pragma region setup
 // Función para manejar errores de GLFW
 void error_callback(int error, const char* description) {
@@ -268,19 +268,19 @@ void Prueba1(VulkanRenderer* m_Renderer) {
             glm::rotate(
                 glm::scale(glm::mat4(1.f), glm::vec3(0.1f,0.02f,0.1f))
                 , glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f))
-            , glm::vec3(0.0f, -50.0f, -25.0f)), backMeshId, glm::vec3(0.0f, 1.0f, 0.0f), 1, 1);
+            , glm::vec3(0.0f, -50.0f, -35.0f)), backMeshId, glm::vec3(0.0f, 1.0f, 0.0f), 1, 1);
     m_Renderer->addLight(
         glm::translate(
             glm::rotate(
                 glm::scale(glm::mat4(1.f), glm::vec3(0.1f, 0.02f, 0.1f))
                 , glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f))
-            , glm::vec3(0.0f, -40.0f, -25.0f)), backMeshId, glm::vec3(1.0f, 0.0f, 0.0f), 1, 1);
+            , glm::vec3(0.0f, -40.0f, -35.0f)), backMeshId, glm::vec3(1.0f, 0.0f, 0.0f), 1, 1);
     m_Renderer->addLight(
         glm::translate(
             glm::rotate(
                 glm::scale(glm::mat4(1.f), glm::vec3(0.1f, 0.02f, 0.1f))
                 , glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f))
-            , glm::vec3(0.0f, -60.0f, -25.0f)), backMeshId, glm::vec3(1.0f, 1.0f, 1.0f), 1, 1);
+            , glm::vec3(0.0f, -60.0f, -35.0f)), backMeshId, glm::vec3(1.0f, 1.0f, 1.0f), 1, 1);
 
 }
 void Prueba2(VulkanRenderer* m_Renderer) {
@@ -574,6 +574,8 @@ int main(int argc, char* argv[]) {
 
     int prueba = PRUEBA;
 
+    float preload = static_cast<float>(glfwGetTime());
+
     switch (prueba) {
     case 1:
         Prueba1(&m_Renderer);
@@ -591,6 +593,9 @@ int main(int argc, char* argv[]) {
         PruebaBaseline(&m_Renderer);
         break;
     }
+
+    float postload = static_cast<float>(glfwGetTime());
+    printf("Tiempo en cargar modelo: %f\n", postload - preload);
 
     m_Renderer.setOutputResolution(m_windowwidth, m_windowheight);
     m_Renderer.save(false);
@@ -637,12 +642,20 @@ int main(int argc, char* argv[]) {
 
     float lasttime = 0.0f;
 
+    bool first = true;
+    bool second = false;
+
     // Bucle principal
     while (!glfwWindowShouldClose(window)) {
 
         float currentFrame = static_cast<float>(glfwGetTime());
         float deltaTime = currentFrame - lasttime;
         lasttime = currentFrame;
+
+        if (second) {
+            second = false;
+            printf("Loading time: %f\n", deltaTime);
+        }
 
         m_pCamera->Update(deltaTime);
 
@@ -676,6 +689,11 @@ int main(int argc, char* argv[]) {
 
         // Intercambiar buffers
         glfwSwapBuffers(window);
+
+        if (first) {
+            second = true;
+            first = false;
+        }
     }
     delete[] imageBuffer;
 
