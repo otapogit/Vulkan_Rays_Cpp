@@ -264,8 +264,8 @@ public:
 		Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.00f, 0.f, 0.f)), glm::vec3(1.0f), rightMeshId);
 		Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(.00f, 0.f, 0.f)), glm::vec3(1.0f), leftMeshId);
 
-		Renderer.setCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
-		//Renderer.setCamera(glm::mat4(1.0f), glm::mat4(1.0f));
+		Renderer.setViewCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
+		//Renderer.setViewCamera(glm::mat4(1.0f), glm::mat4(1.0f));
 		Renderer.setOutputResolution(800, 800);
 		
 

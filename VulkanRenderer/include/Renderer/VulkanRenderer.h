@@ -46,7 +46,7 @@ public:
      * @param id the mesh id
      * @return false if the mesh id does not exists
      */
-    bool addMesh(const glm::mat4& modelMatrix, const glm::vec3& color, MeshId id) override;
+    bool addMesh(const glm::mat4& modelMatrix, const glm::vec3& color, MeshId id, bool inspectable = true) override;
 
     /**
      * @brief Add a texture to the renderer
@@ -92,7 +92,9 @@ public:
      * @param viewMatrix view matrix
      * @param projMatrix projection matrix
      */
-    void setCamera(const glm::mat4& viewMatrix, const glm::mat4& projMatrix) override;
+    void setViewCamera(const glm::mat4& viewMatrix, const glm::mat4& projMatrix) override;
+    void setInspCamera(const glm::mat4& viewMatrix, const glm::mat4& projMatrix) override { //TODO 
+    };
 
     /**
      * @brief Defines the size of the result image
@@ -126,6 +128,10 @@ public:
      * @param s save flag
      */
     void save(bool s);
+
+    bool saveResultToFile(const std::string& filename) override { 
+        //TODO
+        return false; }
 
 private:
     class Impl;

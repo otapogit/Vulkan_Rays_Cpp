@@ -13,6 +13,7 @@ public:
     using LightId = uint32_t;
 
     Renderer() {}
+    virtual ~Renderer() {}
     /**
      * @brief Initializes the underlying graphics library (GL, Vulkan...)
      * @return true, if succeeded
@@ -33,14 +34,22 @@ the scene with Renderer::addMesh
         const std::vector<glm::vec2>& uv,
         const std::vector<uint32_t> inds) = 0;
 
+
+    /**
+    @brief This method reads the obj file and calls the previous method to return the MeshIds (a obj file may have several meshes)
+    */
+    std::vector<MeshId> defineMesh(const std::string& objfilename);
+
     /**
      * @brief Add a previously defined mesh to the scene
      * @param modelMatrix transformation applied to the mesh
      * @param id the mesh id
+     * @param inspectable true, if this mesh is part of the part under inspection, false if it should not be inspected, but
+     * it should be taken into account for occlusions (for example, scaffolding or camera or lighting fixtures)
      * @return false if the mesh id does not exists
      */
     virtual bool addMesh(const glm::mat4& modelMatrix, const glm::vec3
-        & color, MeshId id) = 0;
+        & color, MeshId id, bool inspectable = true) = 0;
 
 
     virtual TextureId addTexture(uint8_t* texels, uint32_t width,
@@ -65,11 +74,19 @@ instances in the scene)
     virtual void clearScene() = 0;
 
     /**
-     * @brief Defines the camera
+     * @brief Defines the view camera
      * @param viewMatrix
      * @param projMatrix
      */
-    virtual void setCamera(const glm::mat4& viewMatrix, const
+    virtual void setViewCamera(const glm::mat4& viewMatrix, const
+        glm::mat4& projMatrix) = 0;
+
+    /**
+     * @brief Defines the inspection camera
+     * @param viewMatrix
+     * @param projMatrix
+     */
+    virtual void setInspCamera(const glm::mat4& viewMatrix, const
         glm::mat4& projMatrix) = 0;
 
     /**
@@ -100,4 +117,6 @@ Renderer::copyResultBytes or Renderer::getResultTextureId
 not compatible with GL)
       */
     virtual uint32_t getResultTextureId() = 0;
+
+    virtual bool saveResultToFile(const std::string& filename) = 0;
 };

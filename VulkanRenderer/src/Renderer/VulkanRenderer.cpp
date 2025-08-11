@@ -346,7 +346,7 @@ instances in the scene)
      * @param viewMatrix
      * @param projMatrix
      */
-     void setCamera(const glm::mat4& viewMatrix, const
+     void setViewCamera(const glm::mat4& viewMatrix, const
         glm::mat4& projMatrix) {
         VP = projMatrix * viewMatrix;
         VP = glm::affineInverse(VP);
@@ -635,7 +635,7 @@ MeshId VulkanRenderer::defineMesh(const std::vector<glm::vec3>& vtcs,
     return pImpl->defineMesh(vtcs, nrmls, uv, inds);
 }
 
-bool VulkanRenderer::addMesh(const glm::mat4& modelMatrix, const glm::vec3& color, MeshId id) {
+bool VulkanRenderer::addMesh(const glm::mat4& modelMatrix, const glm::vec3& color, MeshId id, bool inspectable) {
     return pImpl->addMesh(modelMatrix, color, id);
 }
 
@@ -659,8 +659,8 @@ void VulkanRenderer::clearScene() {
     pImpl->clearScene();
 }
 
-void VulkanRenderer::setCamera(const glm::mat4& viewMatrix, const glm::mat4& projMatrix) {
-    pImpl->setCamera(viewMatrix, projMatrix);
+void VulkanRenderer::setViewCamera(const glm::mat4& viewMatrix, const glm::mat4& projMatrix) {
+    pImpl->setViewCamera(viewMatrix, projMatrix);
 }
 
 void VulkanRenderer::setOutputResolution(uint32_t width, uint32_t height) {
