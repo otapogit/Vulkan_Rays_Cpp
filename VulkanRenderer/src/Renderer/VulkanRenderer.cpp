@@ -102,6 +102,9 @@ class VulkanRenderer::Impl {
         m_raytracer.initRayTracing(m_vkcore.GetSelectedPhysicalDevice(), &m_device);
         m_raytracer.setup(m_vkcore.GetCommandPool(), &m_vkcore);
 
+        VP[0] = glm::mat4(1.0f);
+        VP[1] = glm::mat4(1.0f);
+
         m_raytracer.createRtDescriptorSet();
         m_raytracer.createMvpDescriptorSet();
         m_raytracer.createGeometryDescriptorSet(50);
@@ -348,11 +351,19 @@ instances in the scene)
      */
      void setViewCamera(const glm::mat4& viewMatrix, const
         glm::mat4& projMatrix) {
-        VP = projMatrix * viewMatrix;
-        VP = glm::affineInverse(VP);
+        VP[1] = projMatrix * viewMatrix;
+        //VP[1] = glm::affineInverse(VP[0]);
         //Updatear el buffer que esta en el descriptor set
-        m_raytracer.UpdateMvpMatrix(VP);
+        m_raytracer.UpdateMvpMatrices(VP[0], VP[1]);
     }
+
+     void setInspCamera(const glm::mat4& viewMatrix, const glm::mat4& projMatrix){
+         VP[0] = projMatrix * viewMatrix;
+         VP[0] = glm::affineInverse(VP[0]);
+         //Updatear el buffer que esta en el descriptor set
+         //Ya se suben las 2 matrices por defecto
+         m_raytracer.UpdateMvpMatrices(VP[0], VP[1]);
+     }
 
     /**
      * @brief Defines the size of the result image
@@ -553,6 +564,11 @@ instances in the scene)
          //m_pWindow = window;
      }
 
+     bool saveResultToFile(const std::string& filename) {
+         m_raytracer.saveImageToPNG(filename, windowwidth, windowheight);
+         return true;
+     }
+
     private:
 
         void updateMeshes() {
@@ -598,7 +614,7 @@ instances in the scene)
 
         uint32_t m_baseId = 0;
 
-        glm::mat4 VP;
+        glm::mat4 VP[2];
         bool pipelineCreated = false;
 
         bool saving = false;
@@ -663,6 +679,10 @@ void VulkanRenderer::setViewCamera(const glm::mat4& viewMatrix, const glm::mat4&
     pImpl->setViewCamera(viewMatrix, projMatrix);
 }
 
+void VulkanRenderer::setInspCamera(const glm::mat4& viewMatrix, const glm::mat4& projMatrix) {
+    pImpl->setInspCamera(viewMatrix, projMatrix);
+}
+
 void VulkanRenderer::setOutputResolution(uint32_t width, uint32_t height) {
     pImpl->setOutputResolution(width, height);
 }
@@ -681,4 +701,8 @@ uint32_t VulkanRenderer::getResultTextureId() {
 
 void VulkanRenderer::save(bool s) {
     pImpl->save(s);
+}
+
+bool VulkanRenderer::saveResultToFile(const std::string& filename) {
+    return pImpl->saveResultToFile(filename);
 }

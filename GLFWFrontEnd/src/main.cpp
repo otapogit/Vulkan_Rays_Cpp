@@ -33,7 +33,7 @@
 
 
 //Número de prueba a usar del 1 al 4
-#define PRUEBA 4
+#define PRUEBA 2
 #pragma region setup
 // Función para manejar errores de GLFW
 void error_callback(int error, const char* description) {
@@ -677,8 +677,9 @@ int main(int argc, char* argv[]) {
 
         // Dibujar el cuadrado con textura
         renderTexturedQuad(textureID);
-        //printf("Rendered quad\n");
-        m_Renderer.setCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
+
+        m_Renderer.setInspCamera(m_pCamera->GetVPMatrix(), glm::translate(glm::mat4(1.0f), glm::vec3(0.0f,0.0f,5.0f)));
+        //m_Renderer.setInspCamera(glm::mat4(1.0f), glm::mat4(1.0f));
         m_Renderer.copyResultBytes(imageBuffer, bufferSize);
         glBindTexture(GL_TEXTURE_2D, textureID);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_windowwidth, m_windowheight, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer);
@@ -890,7 +891,7 @@ void initRT(){
     m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), rightMeshId);
     m_Renderer.addMesh(glm::translate(glm::mat4(1.0f), glm::vec3(1.4f, 0.f, 0.f)), glm::vec3(1.0f), leftMeshId);
 
-    m_Renderer.setCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
+    m_Renderer.setInspCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
     //m_Renderer.setCamera(glm::mat4(1.0f), glm::mat4(1.0f));
 
     printf("Rendered everything\n");

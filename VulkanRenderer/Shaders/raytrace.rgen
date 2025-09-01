@@ -7,7 +7,7 @@
 layout(binding = 1, set = 0) uniform accelerationStructureEXT topLevelAS;
 layout(binding = 2, set = 0, rgba8) uniform image2D image;
 
-layout (binding = 1, set = 1) readonly uniform UniformBuffer { mat4 MVP; } ubo;
+layout (binding = 1, set = 1) readonly uniform UniformBuffer { mat4 MVPi; mat4 MVPv; } ubo;
 
 struct RayPayload {
     vec3 color;
@@ -25,10 +25,15 @@ void main() {
 
     
     //Multiplicar por la inversa de la mvp para igualar las transformaciones
-    vec4 origin = ubo.MVP * vec4(0,0,2,1);
-    vec4 target = ubo.MVP * vec4(d.x, d.y, 0, 1);
+    vec4 origin = ubo.MVPi * vec4(0,0,2,1);
+    vec4 target = ubo.MVPi * vec4(d.x, d.y, 0, 1);
     vec4 direction = vec4(normalize(target.xyz - origin.xyz), 0);
     
+    mat4 transform = ubo.MVPv;
+
+    origin =  origin;
+    target =  target;
+
     
     rayPayload.color = vec3(0.0);
     rayPayload.depth = 0;  // Empezar en profundidad 0
@@ -43,5 +48,22 @@ void main() {
                 0 /*sbtRecordStride*/, 0 /*missIndex*/, origin.xyz, 
                 tmin, direction.xyz, tmax, 0 /*payload*/);
 
-    imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(rayPayload.color, 1.0));
+    vec4 worldPoint = ubo.MVPi * vec4(d.x, d.y, 0, 1);
+    vec4 spectatorPoint = ubo.MVPv * worldPoint;
+    
+    // Proyectar a coordenadas de pantalla del espectador
+    vec2 spectatorNDC = spectatorPoint.xy / spectatorPoint.w;
+    vec2 spectatorUV = (spectatorNDC + 1.0) * 0.5;
+    ivec2 spectatorPixel = ivec2(spectatorUV * vec2(gl_LaunchSizeEXT.xy));
+    
+    
+    imageStore(image, spectatorPixel, vec4(vec3(0.7, 0.1, 0.3), 1.0));
+
+    // Guardar en las coordenadas transformadas si están dentro de los límites
+    if (spectatorPixel.x >= 0 && spectatorPixel.x < gl_LaunchSizeEXT.x &&
+        spectatorPixel.y >= 0 && spectatorPixel.y < gl_LaunchSizeEXT.y) {
+        imageStore(image, spectatorPixel, vec4(rayPayload.color, 1.0));
+    }
+
+    //imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(rayPayload.color, 1.0));
 }

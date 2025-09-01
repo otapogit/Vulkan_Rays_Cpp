@@ -681,9 +681,14 @@ namespace core {
         CHECK_VK_RESULT(res, "vkAllocateDescriptorSets MVP");
     }
 
+    struct MvpData {
+        glm::mat4 MVPi;  // Matriz inversa para ray tracing
+        glm::mat4 MVPv;  // Matriz de vista del espectador
+    };
+
     // Crear el buffer para la matriz MVP
     void Raytracer::CreateMvpBuffer() {
-        VkDeviceSize bufferSize = sizeof(glm::mat4); // Asumiendo que usas glm::mat4
+        VkDeviceSize bufferSize = sizeof(glm::mat4)*2; // Asumiendo que usas glm::mat4
 
         m_mvpBufferMemory = m_vkcore->CreateBufferACC(
             bufferSize,
@@ -699,7 +704,7 @@ namespace core {
         VkDescriptorBufferInfo bufferInfo{};
         bufferInfo.buffer = m_mvpBufferMemory.m_buffer;
         bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(glm::mat4);
+        bufferInfo.range = sizeof(MvpData);
 
         VkWriteDescriptorSet descriptorWrite{};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -715,8 +720,18 @@ namespace core {
 
     // Método para actualizar la matriz MVP en runtime
     void Raytracer::UpdateMvpMatrix(const glm::mat4& mvpMatrix) {
-        m_mvpBufferMemory.Update(*m_device, &mvpMatrix, sizeof(glm::mat4));
+        m_mvpBufferMemory.Update(*m_device, &mvpMatrix, sizeof(MvpData));
     }
+
+    void Raytracer::UpdateMvpMatrices(const glm::mat4& mvpInverse, const glm::mat4& mvpViewer) {
+        MvpData mvpData;
+        mvpData.MVPi = mvpInverse;
+        mvpData.MVPv = mvpViewer;
+
+        m_mvpBufferMemory.Update(*m_device, &mvpData, sizeof(MvpData));
+    }
+
+
 #pragma endregion
 
 #pragma region GeometryDescsets

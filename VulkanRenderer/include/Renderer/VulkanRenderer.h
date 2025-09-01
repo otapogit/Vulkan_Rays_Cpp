@@ -93,8 +93,7 @@ public:
      * @param projMatrix projection matrix
      */
     void setViewCamera(const glm::mat4& viewMatrix, const glm::mat4& projMatrix) override;
-    void setInspCamera(const glm::mat4& viewMatrix, const glm::mat4& projMatrix) override { //TODO 
-    };
+    void setInspCamera(const glm::mat4& viewMatrix, const glm::mat4& projMatrix) override;
 
     /**
      * @brief Defines the size of the result image
@@ -129,9 +128,7 @@ public:
      */
     void save(bool s);
 
-    bool saveResultToFile(const std::string& filename) override { 
-        //TODO
-        return false; }
+    bool saveResultToFile(const std::string& filename) override;
 
 private:
     class Impl;

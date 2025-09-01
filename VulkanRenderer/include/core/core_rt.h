@@ -121,6 +121,8 @@ namespace core {
 		void createGeometryDescriptorSet(int maxsize = 10);
 		void updateGeometryDescriptorSet(std::vector<core::SimpleMesh> meshes);
 		size_t copyResultBytes(uint8_t* buffer, size_t bufferSize, VulkanTexture* tex, int width, int height);
+		void saveImageToPNG(const std::string& filename, int width, int height);
+		void UpdateMvpMatrices(const glm::mat4& mvpInverse, const glm::mat4& mvpViewer);
 
 	private:
 
@@ -153,7 +155,7 @@ namespace core {
 		void CleanupGeometryDescriptorSet();
 		
 
-		void saveImageToPNG(const std::string& filename, int width, int height);
+
 		void createStagingBuffer(VkDeviceSize size, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
