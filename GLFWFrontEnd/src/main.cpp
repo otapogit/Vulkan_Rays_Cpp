@@ -33,7 +33,7 @@
 
 
 //Número de prueba a usar del 1 al 4
-#define PRUEBA 2
+#define PRUEBA 5
 #pragma region setup
 // Función para manejar errores de GLFW
 void error_callback(int error, const char* description) {
@@ -522,6 +522,66 @@ void PruebaBaseline(VulkanRenderer* m_Renderer) {
                 , glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f))
             , glm::vec3(0.0f, -60.0f, -25.0f)), backMeshId, glm::vec3(1.0f, 1.0f, 1.0f), 1, 1);
 }
+void Prueba5(VulkanRenderer* r) {
+    constexpr auto plusZ = glm::vec3{ 0, 0, 1 };
+    constexpr auto zero2 = glm::vec2{ 0 };
+    auto meshToInspect = r->defineMesh(
+        {
+            {-2, -2, 0}, {2, -2, 0}, {2, 2, 0}, {-2, 2, 0}
+        },
+        {
+            plusZ, plusZ, plusZ, plusZ
+        },
+        {
+            zero2, zero2, zero2, zero2
+        },
+        {
+            0, 1, 2, 0, 2, 3
+        }
+        );
+    r->addMesh(glm::mat4{ 1.0f }, glm::vec4{ 0.2f, 0.2f, 0.2f, 1 }, meshToInspect, true);
+
+    // One light mesh, three instances
+    auto lightMesh = r->defineMesh(
+        {
+            {-0.25f, -0.25f, 0}, {0.25f, -0.25f, 0}, {0.05f, 0.25f, 0}, { -0.05f, 0.25f, 0 }
+        },
+        {
+            {0, 0, -1}, {0, 0, -1}, {0, 0, -1}, {0, 0, -1}
+        },
+        {
+            {0, 0}, {0, 0}, {0, 0}, {0, 0}
+        },
+        { 0, 3, 2, 0, 2, 1 }
+    );
+    
+    r->addLight(
+        glm::translate(glm::mat4{ 1.0f }, { 5, 0.5, 5 }) * glm::rotate(glm::mat4{ 1.0f }, glm::pi<float>() / 4, { 0, 0, 1 }),
+        lightMesh, glm::vec3{ 1, 0, 0 }, 100);
+    r->addLight(
+        glm::translate(glm::mat4{ 1.0f }, { 5, -0.5, 5 }) * glm::rotate(glm::mat4{ 1.0f }, -glm::pi<float>() / 4, { 0, 0, 1 }),
+        lightMesh, glm::vec3{ 0, 1, 0 }, 100);
+    r->addLight(
+        glm::translate(glm::mat4{ 1.0f }, { 6, 0, 5 }) * glm::rotate(glm::mat4{ 1.0f }, -glm::pi<float>() / 4, { 0, 0, 1 }),
+        lightMesh, glm::vec3{ 0, 0, 1 }, 100);
+
+    // blocking geometry
+    auto occludingMesh = r->defineMesh(
+        {
+            {-2, -2, 0.05}, {0, -2, 0.05}, {0, 2, 0.05}, {-2, 2, 0.05}
+        },
+        {
+            plusZ, plusZ, plusZ, plusZ
+        },
+        {
+            zero2, zero2, zero2, zero2
+        },
+        {
+            0, 1, 2, 0, 2, 3
+        }
+        );
+    r->addMesh(glm::mat4{ 1.0F }, glm::vec4{ 0.2f, 0.2f, 0.2f, 1 }, occludingMesh, false);
+}
 
 #pragma endregion
 
@@ -588,6 +648,9 @@ int main(int argc, char* argv[]) {
         break;
     case 4:
         Prueba4(&m_Renderer);
+        break;
+    case 5:
+        Prueba5(&m_Renderer);
         break;
     default:
         PruebaBaseline(&m_Renderer);
@@ -678,9 +741,13 @@ int main(int argc, char* argv[]) {
         // Dibujar el cuadrado con textura
         renderTexturedQuad(textureID);
 
-        m_Renderer.setInspCamera(m_pCamera->GetVPMatrix(), glm::translate(glm::mat4(1.0f), glm::vec3(0.0f,0.0f,5.0f)));
+        m_Renderer.setInspCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
+        m_Renderer.setViewCamera(glm::mat4(1.0f), glm::mat4(1.0f));
+
+        //m_Renderer.setInspCamera(glm::lookAt(glm::vec3(5.0f,3.0f,5.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f)), glm::mat4(1.0f));
+        //m_Renderer.setViewCamera(m_pCamera->GetVPMatrix(), glm::mat4(1.0f));
         //m_Renderer.setInspCamera(glm::mat4(1.0f), glm::mat4(1.0f));
-        m_Renderer.copyResultBytes(imageBuffer, bufferSize);
+        m_Renderer.copyResultBytes(imageBuffer, bufferSize); 
         glBindTexture(GL_TEXTURE_2D, textureID);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_windowwidth, m_windowheight, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer);
         checkGLError("glTexSubImage2D");

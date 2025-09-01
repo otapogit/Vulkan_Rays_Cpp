@@ -176,7 +176,7 @@ the scene with Renderer::addMesh
      * @return false if the mesh id does not exists
      */
      bool addMesh(const glm::mat4& modelMatrix, const glm::vec3
-        & color, MeshId id)  {
+        & color, MeshId id, bool inspectable)  {
         dirtyupdate = true;
 
         int tid = -1;
@@ -192,7 +192,10 @@ the scene with Renderer::addMesh
 
         newMesh.m_transMat = modelMatrix;
 
-        newMesh.color = glm::vec4(color,1.0f);
+        if(inspectable)
+            newMesh.color = glm::vec4(color,1.0f);
+        else
+            newMesh.color = glm::vec4(color, 0.0f);
 
         m_meshesDraw.push_back(newMesh);
 
@@ -565,8 +568,10 @@ instances in the scene)
      }
 
      bool saveResultToFile(const std::string& filename) {
-         m_raytracer.saveImageToPNG(filename, windowwidth, windowheight);
-         return true;
+         size_t bufferSize = windowwidth * windowheight * (4 + 1);
+         uint8_t* imageBuffer = new uint8_t[bufferSize];
+         int result = stbi_write_png(filename.c_str(), windowwidth, windowheight, 4, imageBuffer, windowwidth * 4);
+         return result;
      }
 
     private:
@@ -652,7 +657,7 @@ MeshId VulkanRenderer::defineMesh(const std::vector<glm::vec3>& vtcs,
 }
 
 bool VulkanRenderer::addMesh(const glm::mat4& modelMatrix, const glm::vec3& color, MeshId id, bool inspectable) {
-    return pImpl->addMesh(modelMatrix, color, id);
+    return pImpl->addMesh(modelMatrix, color, id, inspectable);
 }
 
 TextureId VulkanRenderer::addTexture(uint8_t* texels, uint32_t width, uint32_t height, uint32_t bpp) {

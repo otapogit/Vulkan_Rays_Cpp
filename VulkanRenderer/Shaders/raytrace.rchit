@@ -207,7 +207,7 @@ void main() {
 
 
    // Si no hemos alcanzado la profundidad máxima, lanzar rayo de reflexión
-    if (rayPayload.depth < MAX_DEPTH) {
+    if (rayPayload.depth < MAX_DEPTH && colorBuffer.colors[meshIndex].w == 1) {
         // Calcular dirección de reflexión
         vec3 incomingDirection = gl_WorldRayDirectionEXT;
         vec3 reflectedDirection = reflect(incomingDirection, interpolatedNormal);

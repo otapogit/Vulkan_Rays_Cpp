@@ -1,11 +1,13 @@
 #include <iostream>
 
 #include <GlRenderer.h>
+#include <Renderer/VulkanRenderer.h>
 #include <string>
 #include <chrono>
 
 int main() {
-	GLRenderer r;
+	//GLRenderer r;
+	VulkanRenderer r;
 
 	if (!r.init()) {
 		std::cerr << "Failed to create GL context\n";
@@ -81,7 +83,7 @@ int main() {
 
 		
 		//r.setInspCamera(glm::lookAt(glm::vec3{ 2, 0 , 3 }, glm::vec3{ 0.0f, 2, 0 }, glm::vec3{ 0, 1, 0 }), glm::perspective(glm::radians(15.f), 1920.f / 1080, 1.f, 5.f));
-	r.setInspCamera(glm::lookAt(glm::vec3{ -5, 0 , 5 }, glm::vec3{ 0.0f}, glm::vec3{ 0, 1, 0 }), glm::perspective(glm::radians(15.f), 1920.f / 1080, 1.f, 15.f));
+	r.setInspCamera(glm::lookAt(glm::vec3{ -5, 0 , 5 }, glm::vec3{ 0 }, glm::vec3{ 0, 1, 0 }), glm::perspective(glm::radians(15.f), 1920.f / 1080, 1.f, 15.f));
 	r.setOutputResolution(1920, 1080);
 
 	constexpr float cameraAnimRadius = 5.0f;
@@ -107,7 +109,7 @@ int main() {
 		int64_t us = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
 
 		std::cout << "Frame " << i << "  " << us << " us\n";
-		r.saveResultToFile("result" + std::to_string(i) + ".png");
+		r.saveResultToFile("vkresult" + std::to_string(i) + ".png");
 	}
 
 	return 0;
