@@ -107,7 +107,7 @@ class VulkanRenderer::Impl {
 
         m_raytracer.createRtDescriptorSet();
         m_raytracer.createMvpDescriptorSet();
-        m_raytracer.createGeometryDescriptorSet(50);
+        m_raytracer.createGeometryDescriptorSet(300);
   
 
         m_raytracer.createRtPipeline(rgen, rmiss, rchit);

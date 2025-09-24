@@ -12,6 +12,7 @@
 #include <GLFW/glfw3native.h>  // Importante: debes incluir esto
 #endif
 #include <Renderer/VulkanRenderer.h>
+#include <GlRenderer.h>
 #include "core_fpcamera.h"
 
 #include <windows.h>
@@ -31,9 +32,10 @@
 #include "3rdParty/stb_image.h"
 #include "glfwcamera.h"
 
+#include <chrono>
 
 //Número de prueba a usar del 1 al 4
-#define PRUEBA 5
+#define PRUEBA 4
 #pragma region setup
 // Función para manejar errores de GLFW
 void error_callback(int error, const char* description) {
@@ -583,11 +585,141 @@ void Prueba5(VulkanRenderer* r) {
     r->addMesh(glm::mat4{ 1.0F }, glm::vec4{ 0.2f, 0.2f, 0.2f, 1 }, occludingMesh, false);
 }
 
+std::vector<glm::vec3> calcularPosicionesEnAnillo(int numLuces, float radio) {
+    std::vector<glm::vec3> posiciones;
+    const float PI = 3.14159265358979323846f;
+
+    for (int i = 0; i < numLuces; ++i) {
+        float angulo = 2.0f * PI * i / numLuces;
+        float x = radio * cos(angulo);
+        float y = radio * sin(angulo);
+        float z = 0.0f; // plano XY
+        posiciones.push_back(glm::vec3{ x, y, z });
+    }
+
+    return posiciones;
+}
+
+void PruebaCompare() {
+    GLRenderer r;
+    //VulkanRenderer r;
+
+    if (!r.init()) {
+        std::cerr << "Failed to create GL context\n";
+        exit(3);
+    }
+    else {
+        std::cout << "GL context created\n";
+    }
+
+    //auto carMeshes = r.defineMesh("Debug/teapot.obj");
+    //////auto carMeshes = r.defineMesh("Debug/Car.obj");
+    //for (const auto m : carMeshes)
+    //	r.addMesh(glm::translate(glm::mat4(1.0f), {0, -1.5f, 0}), glm::vec4(0, 1, 0, 1), m);
+
+    constexpr auto plusZ = glm::vec3{ 0, 0, 1 };
+    constexpr auto zero2 = glm::vec2{ 0 };
+
+    OBJLoader loader;
+
+    /*
+        Cargar primero el modelo de la Volkswagen touran
+    */
+
+    //"../GLFWFrontEnd/OBJ/1969_Chevrolet_Camaro_Publish.obj"
+    //"../GLFWFrontEnd/OBJ/free_car_001.obj"
+    //"../GLFWFrontEnd/OBJ/VW_Touran_2007.obj"
+    loader.loadOBJ("../GLFWFrontEnd/OBJ/VW_Touran_2007.obj");
+
+    auto vertices = loader.getVertices();
+    auto normals = loader.getNormals();
+    auto indices = loader.getIndices();
+    auto uvs = loader.getTexCoords();
+
+    uint32_t vanId = r.defineMesh(vertices, normals, uvs, indices);
+    r.addMesh(glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,-0.5f,0.0f)), glm::vec3(1.0f), vanId, false);
+
+    // One light mesh, three instances
+    auto lightMesh = r.defineMesh(
+        {
+            {-0.25f, -0.25f, 0}, {0.25f, -0.25f, 0}, {0.05f, 0.25f, 0}, { -0.05f, 0.25f, 0 }
+        },
+        {
+            {0, 0, -1}, {0, 0, -1}, {0, 0, -1}, {0, 0, -1}
+        },
+        {
+            {0, 0}, {0, 0}, {0, 0}, {0, 0}
+        },
+        { 0, 3, 2, 0, 2, 1 }
+    );
+
+
+    int numLuces = 256;
+    float radio = 1.5f;
+
+    const float PI = 3.14159265358979323846f;
+
+    for (int i = 0; i < numLuces; ++i) {
+        float angulo = 2.0f * PI * i / numLuces;
+        float x = radio * cos(angulo);
+        float y = radio * sin(angulo);
+        float z = 0.0f; // plano XY
+        r.addLight(
+            glm::translate(glm::mat4{ 1.0f }, glm::vec3(x,y,z)),
+            lightMesh, glm::vec3{ x/radio, y/radio, 0.0f }, 100);
+    }
+    /*r.addLight(
+        glm::translate(glm::mat4{ 1.0f }, { 0.0f, 0.0f, 0.0f }),
+        lightMesh, glm::vec3{ 1, 0, 0 }, 100);
+    r.addLight(
+        glm::translate(glm::mat4{ 1.0f }, { 2, -1.0f, -3 }) * glm::rotate(glm::mat4{ 1.0f }, -glm::pi<float>() / 4, { 0, 0, 1 }),
+        lightMesh, glm::vec3{ 0, 1, 0 }, 100);
+    r.addLight(
+        glm::translate(glm::mat4{ 1.0f }, { 2, 0, -4 }) * glm::rotate(glm::mat4{ 1.0f }, -glm::pi<float>() / 4, { 0, 0, 1 }),
+        lightMesh, glm::vec3{ 0, 0, 1 }, 100);*/
+
+
+
+
+
+    r.setInspCamera(glm::lookAt(glm::vec3{ 2, 0 , 3 }, glm::vec3{ 0.0f, 0, 0 }, glm::vec3{ 0, 1, 0 }), glm::perspective(glm::radians(15.f), 1920.f / 1080, 1.f, 5.f));
+    r.setViewCamera(glm::lookAt(glm::vec3{ -5, 0 , 5 }, glm::vec3{ 0 }, glm::vec3{ 0, 1, 0 }), glm::perspective(glm::radians(15.f), 1920.f / 1080, 1.f, 15.f));
+    r.setOutputResolution(1920, 1080);
+
+    constexpr float cameraAnimRadius = 5.0f;
+    constexpr int frames = 10;
+    for (auto i = 0; i < frames; i++) {
+        r.setViewCamera(
+            glm::lookAt(
+                glm::vec3{
+                    cameraAnimRadius * std::cosf(i * glm::pi<float>() * 2 / frames),
+                    cameraAnimRadius * std::sin(i * glm::pi<float>() * 2 / frames),
+                    5 },
+                    glm::vec3{ 0.0f }, glm::vec3{ 0, 1, 0 }), glm::perspective(glm::radians(60.f), 1920.f / 1080, 1.f, 10.f));
+
+        auto start = std::chrono::system_clock::now().time_since_epoch();
+
+        if (!r.render()) {
+            std::cerr << "Error";
+            exit(3);
+        }
+
+        auto end = std::chrono::system_clock::now().time_since_epoch();
+
+        int64_t us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+        std::cout << "Frame " << i << "  " << us << " us\n";
+        r.saveResultToFile("vkresult" + std::to_string(i) + ".png");
+    }
+    exit(0);
+}
+
 #pragma endregion
 
 
 int main(int argc, char* argv[]) {
 
+    //PruebaCompare();
 
     // Configurar callback de errores de GLFW
     glfwSetErrorCallback(error_callback);

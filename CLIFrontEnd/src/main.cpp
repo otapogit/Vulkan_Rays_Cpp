@@ -6,8 +6,8 @@
 #include <chrono>
 
 int main() {
-	//GLRenderer r;
-	VulkanRenderer r;
+	GLRenderer r;
+	//VulkanRenderer r;
 
 	if (!r.init()) {
 		std::cerr << "Failed to create GL context\n";
@@ -109,7 +109,7 @@ int main() {
 		int64_t us = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
 
 		std::cout << "Frame " << i << "  " << us << " us\n";
-		r.saveResultToFile("vkresult" + std::to_string(i) + ".png");
+		r.saveResultToFile("result" + std::to_string(i) + ".png");
 	}
 
 	return 0;

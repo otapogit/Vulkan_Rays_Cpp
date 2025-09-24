@@ -203,7 +203,7 @@ void main() {
     }
 
      vec3 incomingDirection = gl_WorldRayDirectionEXT;
-     const int MAX_DEPTH = 2;
+     const int MAX_DEPTH = 1;
 
 
    // Si no hemos alcanzado la profundidad máxima, lanzar rayo de reflexión
